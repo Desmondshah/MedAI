@@ -1,0 +1,632 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+:root {
+  /* Apple/Tesla inspired color palette */
+  --color-light: #ffffff;
+  --color-light-hover: #f5f5f7;
+  --color-dark: #1d1d1f;
+  --color-accent: #0071e3;
+  --color-accent-hover: #0077ed;
+  --color-secondary: #86868b;
+  --color-tertiary: #f5f5f7;
+  --color-success: #34c759;
+  --color-warning: #ff9500;
+  --color-error: #ff3b30;
+  --color-info: #5ac8fa;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-normal: 250ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-slow: 350ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Base styles */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: var(--color-dark);
+  background: var(--color-light);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Updated accent text style */
+.accent-text {
+  @apply text-slate-800 font-medium tracking-tight;
+}
+
+/* Button styles */
+.button-premium {
+  @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-5 rounded-md transition-all duration-200 shadow-sm hover:shadow-md;
+}
+
+.button-premium-outline {
+  @apply border border-blue-600 text-blue-600 bg-transparent hover:bg-blue-50 font-medium py-2.5 px-5 rounded-md transition-all duration-200;
+}
+
+/* Card styles */
+.card-premium {
+  @apply bg-white rounded-xl shadow-lg border-0 overflow-hidden transition-all duration-300 hover:shadow-xl;
+}
+
+/* Input fields */
+.input-premium {
+  @apply w-full px-4 py-3 rounded-md bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all;
+}
+
+.textarea-premium {
+  @apply w-full px-4 py-3 rounded-md bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all;
+}
+
+/* Animation utilities */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-fadeDown {
+  animation: fadeDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.hover-lift {
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeDown {
+  from { transform: translateY(-10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes tabFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Custom scrollbar */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Glass morphism effect */
+.glass-effect {
+  @apply backdrop-blur-lg bg-white/80 border border-white/20;
+}
+
+/* Alert styles */
+.alert-premium {
+  @apply rounded-lg p-4 border-l-4;
+}
+
+.alert-premium.info {
+  @apply bg-blue-50 border-blue-500 text-blue-700;
+}
+
+.alert-premium.success {
+  @apply bg-green-50 border-green-500 text-green-700;
+}
+
+.alert-premium.warning {
+  @apply bg-yellow-50 border-yellow-500 text-yellow-700;
+}
+
+.alert-premium.error {
+  @apply bg-red-50 border-red-500 text-red-700;
+}
+
+/* Tesla/Apple-like gradient backgrounds */
+.bg-gradient-premium {
+  @apply bg-gradient-to-r from-blue-600 to-indigo-600;
+}
+
+.bg-gradient-secondary {
+  @apply bg-gradient-to-r from-gray-100 to-gray-200;
+}
+
+/* Tag/badge styles */
+.tag-premium {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.tag-blue {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.tag-gray {
+  @apply bg-gray-100 text-gray-800;
+}
+
+.tag-green {
+  @apply bg-green-100 text-green-800;
+}
+
+/* Tooltip styles */
+.tooltip {
+  @apply relative inline-block;
+}
+
+.tooltip-text {
+  @apply invisible absolute z-10 px-3 py-2 text-sm text-white bg-gray-900 rounded-md opacity-0 transition-opacity duration-300;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.tooltip:hover .tooltip-text {
+  @apply visible opacity-100;
+}
+
+/* Modal styles */
+.modal-premium {
+  @apply fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm transition-all duration-300;
+}
+
+.modal-content-premium {
+  @apply bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden opacity-0 transform translate-y-4 transition-all duration-300;
+  animation: modal-appear 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modal-appear {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Navigation styles */
+.nav-link-premium {
+  @apply px-4 py-2 text-gray-500 hover:text-blue-600 rounded-md transition-all duration-200;
+}
+
+.nav-link-premium.active {
+  @apply text-blue-600 bg-blue-50;
+}
+
+/* Focus styles */
+.focus-premium {
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+}
+
+/* Custom component styles */
+.animate-tabFadeIn {
+  animation: tabFadeIn 0.3s ease-out forwards;
+}
+
+/* Add these utility classes to your globals.css or Tailwind config */
+
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .animation-delay-100 {
+    animation-delay: 100ms;
+  }
+}
+
+/* Animation for slide-up effect */
+.slide-up {
+  animation: slideUp 0.4s ease forwards;
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+@keyframes slideUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Additional styling for the premium header */
+.backdrop-blur-xl {
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+}
+
+/* Advanced Chat UI Styling */
+
+/* Animation delays */
+.animation-delay-100 {
+  animation-delay: 100ms;
+}
+
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Message Styling */
+.message-bubble {
+  transition: all 0.2s ease;
+}
+
+.message-bubble:hover {
+  transform: scale(1.02);
+}
+
+/* Pinned message effect */
+.pinned-message {
+  position: relative;
+}
+
+.pinned-message::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  height: calc(100% - 20px);
+  width: 3px;
+  background: linear-gradient(to bottom, #3b82f6, #60a5fa);
+  border-radius: 2px;
+  opacity: 0.8;
+}
+
+/* Typing animation */
+.typing-animation {
+  display: flex;
+  align-items: center;
+  column-gap: 6px;
+  padding: 6px 0;
+}
+
+.typing-animation span {
+  height: 8px;
+  width: 8px;
+  background-color: #e5e7eb;
+  border-radius: 50%;
+  display: block;
+  opacity: 0.4;
+}
+
+.typing-animation span:nth-child(1) {
+  animation: pulse 1s infinite;
+}
+
+.typing-animation span:nth-child(2) {
+  animation: pulse 1s infinite 0.3s;
+}
+
+.typing-animation span:nth-child(3) {
+  animation: pulse 1s infinite 0.6s;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.9;
+  }
+}
+
+/* Message actions */
+.message-actions {
+  transition: all 0.2s ease;
+  transform-origin: left;
+}
+
+/* Animated gradient background */
+.animated-gradient {
+  background-size: 200% 200%;
+  animation: gradient 8s ease infinite;
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Framer Motion animation classes */
+.animate-in {
+  animation-duration: 300ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+.zoom-in-95 {
+  animation-name: zoomIn95;
+}
+
+@keyframes zoomIn95 {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Glassmorphism effects */
+.glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Loader animation for button */
+.loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loader div {
+  animation: loader 0.6s infinite alternate;
+}
+
+.loader div:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loader div:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes loader {
+  0% {
+    opacity: 0.3;
+    transform: translateY(0px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(-5px);
+  }
+}
+
+/* Additional chat styling fixes */
+
+/* Fix for Avatar component */
+.chat-avatar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 2.25rem; /* h-9 */
+  height: 2.25rem; /* h-9 */
+  border-radius: 9999px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.chat-avatar.assistant {
+  background-color: #dbeafe; /* bg-blue-100 */
+  box-shadow: 0 0 0 2px white;
+}
+
+.chat-avatar.user {
+  background-color: #2563eb; /* bg-blue-600 */
+  box-shadow: 0 0 0 2px white;
+}
+
+.chat-avatar.assistant svg {
+  color: #2563eb; /* text-blue-600 */
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.chat-avatar.user .avatar-text {
+  color: white;
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+
+/* Fix for Badge component */
+.chat-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 0.125rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.chat-badge.pinned {
+  background-color: #dbeafe; /* bg-blue-50 */
+  color: #1d4ed8; /* text-blue-700 */
+  border: 1px solid #bfdbfe; /* border-blue-200 */
+}
+
+.chat-badge.helpful {
+  background-color: #dcfce7; /* bg-green-50 */
+  color: #15803d; /* text-green-700 */
+  border: 1px solid #bbf7d0; /* border-green-200 */
+}
+
+.chat-badge.not-helpful {
+  background-color: #fee2e2; /* bg-red-50 */
+  color: #b91c1c; /* text-red-700 */
+  border: 1px solid #fecaca; /* border-red-200 */
+}
+
+.chat-badge svg {
+  width: 0.75rem;
+  height: 0.75rem;
+  margin-right: 0.25rem;
+}
+
+/* Message Bubble Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.3s ease forwards;
+}
+
+/* Fix for Dialog Modal */
+.chat-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+}
+
+.chat-modal-content {
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  max-width: 28rem;
+  overflow: hidden;
+  animation: modalFadeIn 0.3s ease forwards;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Typing animation fixes */
+.chat-typing-animation {
+  display: flex;
+  align-items: center;
+  column-gap: 0.375rem;
+  padding: 0.375rem 0;
+}
+
+.chat-typing-animation span {
+  height: 0.5rem;
+  width: 0.5rem;
+  background-color: #e5e7eb;
+  border-radius: 50%;
+  display: block;
+  opacity: 0.4;
+}
+
+.chat-typing-animation span:nth-child(1) {
+  animation: typingPulse 1s infinite;
+}
+
+.chat-typing-animation span:nth-child(2) {
+  animation: typingPulse 1s infinite 0.3s;
+}
+
+.chat-typing-animation span:nth-child(3) {
+  animation: typingPulse 1s infinite 0.6s;
+}
+
+@keyframes typingPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.9;
+  }
+}
+
+/* Context panel slide animation fix */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.slide-in-right {
+  animation: slideInRight 0.3s ease forwards;
+}
+
+/* Fix for transition issues */
+.chat-transition {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
