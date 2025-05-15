@@ -53,7 +53,7 @@ export default function App() {
           <div className="inline-block relative">
             <Brain className="h-10 w-10 text-blue-600 animate-pulse" />
           </div>
-          <p className="text-gray-600 animate-pulse">Initializing Dorothy...</p>
+          <p className="text-gray-600 animate-pulse">Initializing Dorathy...</p>
         </div>
       </div>
     );
@@ -88,7 +88,7 @@ export default function App() {
           <div className="bg-gradient-premium text-white p-1.5 rounded-md shadow-sm">
             <Brain className="h-6 w-6" />
           </div>
-          <h2 className="text-xl font-semibold text-gray-900">Dorothy</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Dorathy</h2>
         </div>
         
         {/* Desktop Navigation */}
@@ -146,7 +146,7 @@ export default function App() {
       
       <footer className="border-t border-gray-100 py-4 px-8 text-center text-sm text-gray-500">
         <p>
-          © 2025 Dorothy AI - Your Medical Education Assistant
+          © 2025 Dorathy AI - Your Medical Education Assistant
         </p>
       </footer>
       

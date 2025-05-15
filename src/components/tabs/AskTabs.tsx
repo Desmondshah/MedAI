@@ -90,7 +90,7 @@ export function AskTab({ userId }: UserAwareProps) {
     {
       id: "welcome-message",
       role: "assistant",
-      content: "Hi, I'm Dorothy, your medical AI assistant. How can I help you today?",
+      content: "Hi, I'm Dorathy, your medical AI assistant. How can I help you today?",
       timestamp: new Date(),
       status: "seen"
     }
@@ -428,7 +428,7 @@ const handleSubmit = async (e?: React.FormEvent) => {
     const messageIndex = chatHistory.findIndex(msg => msg.id === messageId);
     const prevQuestion = messageIndex > 0 && chatHistory[messageIndex - 1].role === "user" 
       ? chatHistory[messageIndex - 1].content 
-      : "Dorothy Response";
+      : "Dorathy Response";
     
     setNoteTitle(prevQuestion.substring(0, 50));
     setShowSaveDialog(true);
@@ -649,7 +649,7 @@ const handleSubmit = async (e?: React.FormEvent) => {
           <div className={`h-8 w-8 rounded-full ${darkMode ? 'bg-blue-500' : 'bg-blue-600'} flex items-center justify-center mr-3 transition-colors duration-300`}>
             <Brain className="h-4 w-4 text-white" />
           </div>
-          <h1 className={`text-lg font-medium ${darkMode ? 'text-white' : 'text-gray-900'} transition-colors duration-300`}>Dorothy</h1>
+          <h1 className={`text-lg font-medium ${darkMode ? 'text-white' : 'text-gray-900'} transition-colors duration-300`}>Dorathy</h1>
           <Badge className={`ml-2 ${darkMode ? 'bg-neutral-800 text-neutral-300' : 'bg-gray-100 text-gray-700'} transition-colors duration-300`}>Medical AI</Badge>
         </div>
       </div>
@@ -877,7 +877,7 @@ const handleSubmit = async (e?: React.FormEvent) => {
                 <div className={`font-medium mb-1 ${
                   darkMode ? "text-neutral-200" : "text-gray-800"
                 } transition-colors duration-300`}>
-                  Dorothy is thinking...
+                  Dorathy is thinking...
                 </div>
                 <div className={`text-sm ${
                   darkMode ? "text-neutral-400" : "text-gray-600"

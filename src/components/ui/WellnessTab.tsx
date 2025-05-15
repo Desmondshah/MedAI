@@ -198,7 +198,7 @@ const WellnessTab: React.FC<UserAwareProps> = ({ userId }) => {
                       <div className="bg-indigo-100 p-1 rounded-full">
                         <Heart className="h-4 w-4 text-indigo-600" />
                       </div>
-                      <p className="font-medium">Dorothy</p>
+                      <p className="font-medium">Dorathy</p>
                     </div>
                     
                     <div className="mb-2 flex items-center space-x-2">

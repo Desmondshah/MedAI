@@ -153,7 +153,7 @@ export default function Content({ userId }: UserAwareProps) {
     <div className="flex flex-col">
       <div className="text-center max-w-3xl mx-auto mb-8 mt-4 px-4">
         <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-3 tracking-tight">
-          <span className="text-transparent bg-clip-text bg-gradient-premium">Dorothy</span> AI Assistant
+          <span className="text-transparent bg-clip-text bg-gradient-premium">Dorathy</span> AI Assistant
         </h1>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
           Your AI-powered medical education companion
