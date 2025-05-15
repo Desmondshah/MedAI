@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Id } from "../../convex/_generated/dataModel";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { 
   Brain, 
   FileText, 
@@ -14,10 +13,13 @@ import {
   Sparkles 
 } from "lucide-react";
 
+// Import TabGroup component
+import { TabGroup } from "../components/ui/tabgroup";
+
 // Import Tab Components
 import { AskTab } from "./tabs/AskTabs";
 import { NotesTab } from "./tabs/NoteTabs";
-import  FileSearch from "./ui/FileSearch";
+import FileSearch from "./ui/FileSearch";
 import { BookmarksTab } from "./tabs/BookmarksTab";
 import { FlashcardsTab, QuizzesTab, ProgressTab } from "./tabs/StudyTabs";
 
@@ -33,6 +35,7 @@ interface UserAwareProps {
 export default function Content({ userId }: UserAwareProps) {
   // Track scroll position for header effects
   const [scrolled, setScrolled] = useState(false);
+  const [activeTab, setActiveTab] = useState("ask");
 
   // Add scroll event listener
   useEffect(() => {
@@ -43,6 +46,108 @@ export default function Content({ userId }: UserAwareProps) {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Define all tabs with their icons
+  const allTabs = [
+    {
+      id: "ask",
+      label: "Ask",
+      icon: <Brain className="h-4 w-4" />
+    },
+    {
+      id: "notes",
+      label: "Notes",
+      icon: <FileText className="h-4 w-4" />
+    },
+    {
+      id: "file-search",
+      label: "Lecture Search",
+      icon: <Search className="h-4 w-4" />
+    },
+    {
+      id: "flashcards",
+      label: "Flashcards",
+      icon: <BookOpen className="h-4 w-4" />
+    },
+    {
+      id: "quizzes",
+      label: "Quizzes",
+      icon: <Book className="h-4 w-4" />
+    },
+    {
+      id: "bookmarks",
+      label: "Bookmarks",
+      icon: <Bookmark className="h-4 w-4" />
+    },
+    {
+      id: "progress",
+      label: "Progress",
+      icon: <Activity className="h-4 w-4" />
+    },
+    {
+      id: "study-plan",
+      label: "Study Plan",
+      icon: <Calendar className="h-4 w-4" />
+    },
+    {
+      id: "wellness",
+      label: "Wellness",
+      icon: <Heart className="h-4 w-4" />
+    },
+    {
+      id: "daily-digest",
+      label: "Today",
+      icon: <Sparkles className="h-4 w-4" />
+    }
+  ];
+  
+  // Group tabs for better organization
+  const groupedTabs = {
+    "Main": [
+      allTabs[0], // Ask
+      allTabs[1], // Notes
+      allTabs[2], // Lecture Search
+    ],
+    "Study": [
+      allTabs[3], // Flashcards
+      allTabs[4], // Quizzes
+      allTabs[5], // Bookmarks
+      allTabs[6], // Progress
+    ],
+    "Planning": [
+      allTabs[7], // Study Plan
+      allTabs[8], // Wellness
+      allTabs[9], // Daily Digest
+    ]
+  };
+  
+  // Render the active tab content
+  const renderActiveTab = () => {
+    switch(activeTab) {
+      case "ask":
+        return <AskTab userId={userId} />;
+      case "notes":
+        return <NotesTab userId={userId} />;
+      case "file-search":
+        return <FileSearch userId={userId} />;
+      case "flashcards":
+        return <FlashcardsTab userId={userId} />;
+      case "quizzes":
+        return <QuizzesTab userId={userId} />;
+      case "bookmarks":
+        return <BookmarksTab userId={userId} />;
+      case "progress":
+        return <ProgressTab userId={userId} />;
+      case "study-plan":
+        return <StudyPlanTab userId={userId} />;
+      case "wellness":
+        return <WellnessTab userId={userId} />;
+      case "daily-digest":
+        return <DailyDigestTab userId={userId} />;
+      default:
+        return <AskTab userId={userId} />;
+    }
+  };
 
   return (
     <div className="flex flex-col">
@@ -55,185 +160,32 @@ export default function Content({ userId }: UserAwareProps) {
         </p>
       </div>
 
-      <Tabs defaultValue="ask" className="w-full">
-        {/* Premium Tab Header - Tesla/Apple Style */}
-        <div 
-          className={`sticky top-0 z-50 backdrop-blur-xl transition-all duration-300 ${
-            scrolled 
-              ? 'bg-white/85 shadow-md' 
-              : 'bg-white/50'
-          } border-b border-gray-200`}
-        >
-          <div className="max-w-6xl mx-auto">
-            <TabsList className="flex justify-center gap-6 border-none shadow-none bg-transparent p-0 h-auto overflow-x-auto no-scrollbar">
-              {/* Phase 1 tabs */}
-              <TabsTrigger 
-                value="ask" 
-                className="data-[state=active]:text-blue-600 data-[state=active]:border-blue-600 data-[state=active]:bg-transparent
-                           text-gray-700 hover:text-blue-600 transition-all py-4 px-3 hover:translate-y-[-2px] active:scale-95
-                           rounded-none min-w-fit border-b-2 border-transparent data-[state=active]:shadow-none"
-              >
-                <Brain className="h-4 w-4 mr-2" />
-                <span>Ask</span>
-              </TabsTrigger>
-              
-              <TabsTrigger 
-                value="notes"
-                className="data-[state=active]:text-blue-600 data-[state=active]:border-blue-600 data-[state=active]:bg-transparent
-                           text-gray-700 hover:text-blue-600 transition-all py-4 px-3 hover:translate-y-[-2px] active:scale-95
-                           rounded-none min-w-fit border-b-2 border-transparent data-[state=active]:shadow-none"
-              >
-                <FileText className="h-4 w-4 mr-2" />
-                <span>Notes</span>
-              </TabsTrigger>
-
-              <TabsTrigger 
-                value="file-search"
-                className="data-[state=active]:text-blue-600 data-[state=active]:border-blue-600 data-[state=active]:bg-transparent
-                           text-gray-700 hover:text-blue-600 transition-all py-4 px-3 hover:translate-y-[-2px] active:scale-95
-                           rounded-none min-w-fit border-b-2 border-transparent data-[state=active]:shadow-none"
-              >
-                <Search className="h-4 w-4 mr-2" />
-                <span>Lecture Search</span>
-              </TabsTrigger>
-
-              <TabsTrigger 
-                value="flashcards"
-                className="data-[state=active]:text-blue-600 data-[state=active]:border-blue-600 data-[state=active]:bg-transparent
-                           text-gray-700 hover:text-blue-600 transition-all py-4 px-3 hover:translate-y-[-2px] active:scale-95
-                           rounded-none min-w-fit border-b-2 border-transparent data-[state=active]:shadow-none"
-              >
-                <BookOpen className="h-4 w-4 mr-2" />
-                <span>Flashcards</span>
-              </TabsTrigger>
-
-              <TabsTrigger 
-                value="quizzes"
-                className="data-[state=active]:text-blue-600 data-[state=active]:border-blue-600 data-[state=active]:bg-transparent
-                           text-gray-700 hover:text-blue-600 transition-all py-4 px-3 hover:translate-y-[-2px] active:scale-95
-                           rounded-none min-w-fit border-b-2 border-transparent data-[state=active]:shadow-none"
-              >
-                <Book className="h-4 w-4 mr-2" />
-                <span>Quizzes</span>
-              </TabsTrigger>
-              
-              <TabsTrigger 
-                value="bookmarks"
-                className="data-[state=active]:text-blue-600 data-[state=active]:border-blue-600 data-[state=active]:bg-transparent
-                           text-gray-700 hover:text-blue-600 transition-all py-4 px-3 hover:translate-y-[-2px] active:scale-95
-                           rounded-none min-w-fit border-b-2 border-transparent data-[state=active]:shadow-none"
-              >
-                <Bookmark className="h-4 w-4 mr-2" />
-                <span>Bookmarks</span>
-              </TabsTrigger>
-              
-              <TabsTrigger 
-                value="progress"
-                className="data-[state=active]:text-blue-600 data-[state=active]:border-blue-600 data-[state=active]:bg-transparent
-                           text-gray-700 hover:text-blue-600 transition-all py-4 px-3 hover:translate-y-[-2px] active:scale-95
-                           rounded-none min-w-fit border-b-2 border-transparent data-[state=active]:shadow-none"
-              >
-                <Activity className="h-4 w-4 mr-2" />
-                <span>Progress</span>
-              </TabsTrigger>
-              
-              {/* Phase 2 tabs */}
-              <TabsTrigger 
-                value="study-plan"
-                className="data-[state=active]:text-blue-600 data-[state=active]:border-blue-600 data-[state=active]:bg-transparent
-                           text-gray-700 hover:text-blue-600 transition-all py-4 px-3 hover:translate-y-[-2px] active:scale-95
-                           rounded-none min-w-fit border-b-2 border-transparent data-[state=active]:shadow-none"
-              >
-                <Calendar className="h-4 w-4 mr-2" />
-                <span>Study Plan</span>
-              </TabsTrigger>
-              
-              <TabsTrigger 
-                value="wellness"
-                className="data-[state=active]:text-blue-600 data-[state=active]:border-blue-600 data-[state=active]:bg-transparent
-                           text-gray-700 hover:text-blue-600 transition-all py-4 px-3 hover:translate-y-[-2px] active:scale-95
-                           rounded-none min-w-fit border-b-2 border-transparent data-[state=active]:shadow-none"
-              >
-                <Heart className="h-4 w-4 mr-2" />
-                <span>Wellness</span>
-              </TabsTrigger>
-              
-              <TabsTrigger 
-                value="daily-digest"
-                className="data-[state=active]:text-blue-600 data-[state=active]:border-blue-600 data-[state=active]:bg-transparent
-                           text-gray-700 hover:text-blue-600 transition-all py-4 px-3 hover:translate-y-[-2px] active:scale-95
-                           rounded-none min-w-fit border-b-2 border-transparent data-[state=active]:shadow-none"
-              >
-                <Sparkles className="h-4 w-4 mr-2" />
-                <span>Today</span>
-              </TabsTrigger>
-            </TabsList>
-          </div>
+      {/* Tab Navigation with overflow management */}
+      <div 
+        className={`sticky top-0 z-50 backdrop-blur-sm transition-all duration-300 ${
+          scrolled 
+            ? 'bg-white/95 border-b border-gray-100' 
+            : 'bg-white/80'
+        }`}
+      >
+        <div className="max-w-6xl mx-auto">
+          {/* TabGroup component handles responsive behavior */}
+          <TabGroup 
+            tabs={allTabs}
+            activeTab={activeTab}
+            onChange={setActiveTab}
+            variant="underline"
+            mobileDisplay="drawer"
+            visibleTabCount={5}
+            groupedTabs={groupedTabs}
+          />
         </div>
+      </div>
 
-        {/* Tab Content Container */}
-        <div className="py-6 px-4">
-          {/* Phase 1 Tab Contents */}
-          <TabsContent value="ask" className="mt-2 slide-up animation-delay-100">
-            <AskTab userId={userId} />
-          </TabsContent>
-          
-          <TabsContent value="notes" className="mt-2 slide-up animation-delay-100">
-            <NotesTab userId={userId} />
-          </TabsContent>
-
-          <TabsContent value="file-search" className="mt-2 slide-up animation-delay-100">
-            <FileSearch userId={userId} />
-          </TabsContent>
-          
-          <TabsContent value="flashcards" className="mt-2 slide-up animation-delay-100">
-            <FlashcardsTab userId={userId} />
-          </TabsContent>
-          
-          <TabsContent value="quizzes" className="mt-2 slide-up animation-delay-100">
-            <QuizzesTab userId={userId} />
-          </TabsContent>
-          
-          <TabsContent value="bookmarks" className="mt-2 slide-up animation-delay-100">
-            <BookmarksTab userId={userId} />
-          </TabsContent>
-          
-          <TabsContent value="progress" className="mt-2 slide-up animation-delay-100">
-            <ProgressTab userId={userId} />
-          </TabsContent>
-          
-          {/* Phase 2 Tab Contents */}
-          <TabsContent value="study-plan" className="mt-2 slide-up animation-delay-100">
-            <StudyPlanTab userId={userId} />
-          </TabsContent>
-          
-          <TabsContent value="wellness" className="mt-2 slide-up animation-delay-100">
-            <WellnessTab userId={userId} />
-          </TabsContent>
-          
-          <TabsContent value="daily-digest" className="mt-2 slide-up animation-delay-100">
-            <DailyDigestTab userId={userId} />
-          </TabsContent>
-        </div>
-      </Tabs>
+      {/* Tab Content */}
+      <div className="py-6 px-4 animate-in fade-in">
+        {renderActiveTab()}
+      </div>
     </div>
   );
 }
-
-// You may need to add this CSS to your global styles
-// For the no-scrollbar utility class:
-/*
-@layer utilities {
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  
-  .animation-delay-100 {
-    animation-delay: 100ms;
-  }
-}
-*/

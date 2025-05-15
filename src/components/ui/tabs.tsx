@@ -21,7 +21,7 @@ interface TabsProps {
   onValueChange?: (value: string) => void;
   children: React.ReactNode;
   className?: string;
-  variant?: "default" | "premium" | "pill" | "underline";
+  variant?: "default" | "minimal" | "pill" | "underline";
 }
 
 export function Tabs({ 
@@ -30,7 +30,7 @@ export function Tabs({
   onValueChange, 
   children, 
   className = "",
-  variant = "default"
+  variant = "minimal" // Change default to minimal
 }: TabsProps) {
   const [tabValue, setTabValue] = useState(value || defaultValue);
 
@@ -77,7 +77,7 @@ export function TabsList({
 }: TabsListProps) {
   const variantClasses = {
     default: "bg-gray-50 p-1 border border-gray-100 shadow-sm",
-    premium: "bg-gradient-to-tr from-white to-gray-50 p-1 shadow-sm border border-gray-100",
+    minimal: "border-b border-gray-100", // Simplified minimalist style
     pill: "bg-transparent",
     underline: "border-b border-gray-200",
   };
@@ -109,8 +109,8 @@ export function TabsList({
   return (
     <div
       ref={tabsRef}
-      className={`inline-flex items-center rounded-xl ${
-        scrollable ? "overflow-x-auto scrollbar-hide" : ""
+      className={`inline-flex items-center w-full ${
+        scrollable ? "overflow-x-auto no-scrollbar" : ""
       } ${centered ? "justify-center" : ""} ${className}`}
       data-variant={useContext(TabsContext)?.value}
       role="tablist"
@@ -145,11 +145,11 @@ export function TabsTrigger({
         ? "bg-white text-blue-600 shadow-sm font-medium"
         : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
     } rounded-lg`,
-    premium: `${
+    minimal: `${
       isSelected
-        ? "bg-white text-blue-600 shadow-md font-medium"
-        : "text-gray-600 hover:text-gray-900 hover:bg-white/70"
-    } rounded-lg transition-shadow`,
+        ? "text-blue-600 font-medium border-b-2 border-blue-600" // Clean underline for active tab
+        : "text-gray-500 hover:text-gray-700 border-b-2 border-transparent"
+    } rounded-none transition-colors`, // Simple transition with no shadow or background
     pill: `${
       isSelected
         ? "bg-blue-50 text-blue-600 font-medium border-blue-100"
@@ -164,7 +164,7 @@ export function TabsTrigger({
   
   // Determine which variant to use from the context
   const tabsContainer = document.querySelector('.tabs-container');
-  const variant = tabsContainer?.getAttribute('data-variant') || 'default';
+  const variant = tabsContainer?.getAttribute('data-variant') || 'minimal';
   
   return (
     <button
@@ -173,8 +173,8 @@ export function TabsTrigger({
       aria-selected={isSelected}
       data-state={isSelected ? "active" : "inactive"}
       disabled={disabled}
-      className={`inline-flex items-center justify-center whitespace-nowrap px-4 py-2.5 text-sm transition-all 
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 
+      className={`inline-flex items-center justify-center whitespace-nowrap px-4 py-2 text-sm transition-all 
+        focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 focus-visible:ring-offset-1 
         disabled:pointer-events-none disabled:opacity-50 ${variantStyles[variant as keyof typeof variantStyles]} ${className}`}
       onClick={() => onValueChange(value)}
     >
@@ -217,13 +217,3 @@ export function TabsContent({
     </div>
   );
 }
-
-// CSS animation keyframes should be added to your global CSS:
-// @keyframes tabFadeIn {
-//   from { opacity: 0; transform: translateY(10px); }
-//   to { opacity: 1; transform: translateY(0); }
-// }
-// 
-// .animate-tabFadeIn {
-//   animation: tabFadeIn 0.3s ease-out forwards;
-// }

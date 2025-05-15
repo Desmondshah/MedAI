@@ -630,3 +630,265 @@ body {
   transition-duration: 150ms;
 }
 
+/* Animation for tab content */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-in.fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+/* Mobile drawer animation */
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.3s ease-out forwards;
+}
+
+/* Overflow menu animation */
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.scale-up {
+  animation: scaleUp 0.2s ease-out forwards;
+  transform-origin: top right;
+}
+
+/* Hide scrollbars but maintain functionality */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Transition utilities */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.transition-transform {
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.transition-opacity {
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Focus states for accessibility */
+.focus-ring {
+  outline: none;
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.focus-ring:focus-visible {
+  box-shadow: 0 0 0 2px white, 0 0 0 4px #3b82f6;
+}
+
+/* Responsive breakpoints for tab groups */
+@media (max-width: 768px) {
+  /* Tab group styling for mobile */
+  .tab-group-mobile button span:not(:first-child) {
+    display: none;
+  }
+  
+  /* Keep only icons visible in smaller screens */
+  .tab-group-mobile button span:first-child {
+    margin-right: 0;
+  }
+}
+
+/* Optional: Tab group variants */
+
+/* Minimal tab style */
+.tab-group-minimal [role="tab"] {
+  border-radius: 0;
+  border-bottom-width: 2px;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.tab-group-minimal [role="tab"][aria-selected="true"] {
+  color: #2563eb;
+  font-weight: 500;
+  border-bottom-color: #2563eb;
+}
+
+.tab-group-minimal [role="tab"][aria-selected="false"] {
+  color: #6b7280;
+  border-bottom-color: transparent;
+}
+
+/* Pills tab style */
+.tab-group-pills [role="tab"] {
+  border-radius: 9999px;
+  padding: 0.375rem 0.75rem;
+}
+
+.tab-group-pills [role="tab"][aria-selected="true"] {
+  background-color: #eff6ff;
+  color: #2563eb;
+  font-weight: 500;
+}
+
+.tab-group-pills [role="tab"][aria-selected="false"] {
+  color: #6b7280;
+}
+
+/* Enclosed tab style */
+.tab-group-enclosed {
+  padding: 0.25rem;
+  background-color: #f3f4f6;
+  border-radius: 0.5rem;
+}
+
+.tab-group-enclosed [role="tab"] {
+  border-radius: 0.375rem;
+  padding: 0.375rem 0.75rem;
+}
+
+.tab-group-enclosed [role="tab"][aria-selected="true"] {
+  background-color: white;
+  color: #2563eb;
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.tab-group-enclosed [role="tab"][aria-selected="false"] {
+  color: #6b7280;
+}
+
+/* Group tab headers */
+.tab-group-section-header {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 1rem;
+}
+
+/* Optional: Tab group drawer styles */
+.tab-group-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 16rem;
+  max-width: 70vw;
+  height: 100%;
+  background-color: white;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  z-index: 50;
+  overflow-y: auto;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+.tab-group-drawer.open {
+  transform: translateX(0);
+}
+
+.tab-group-drawer-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 40;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.tab-group-drawer-backdrop.open {
+  opacity: 1;
+}
+
+/* Minimalist tab styles */
+.tabs-container[data-variant="minimal"] .no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.tabs-container[data-variant="minimal"] .no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Clean, minimalist animation for tab content */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-tabFadeIn {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+/* Minimalist active tab indicator styles */
+.tabs-container[data-variant="minimal"] [data-state="active"] {
+  position: relative;
+}
+
+/* Optional: hover effect for inactive tabs */
+.tabs-container[data-variant="minimal"] [data-state="inactive"]:hover {
+  color: #4B5563; /* text-gray-600 */
+}
+
+/* Optional alternate style: dot indicator instead of underline */
+.tabs-container[data-variant="dot"] [data-state="active"]::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: #2563EB; /* blue-600 */
+}
+
+/* Optional: simple floating appearance for header */
+.minimal-header-float {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+/* Optional: ghost tabs style - even more minimal */
+.tabs-container[data-variant="ghost"] [data-state="active"] {
+  font-weight: 500;
+  color: #2563EB; /* blue-600 */
+}
+
+.tabs-container[data-variant="ghost"] button {
+  padding: 0.5rem 0.75rem;
+}
+
+/* For mobile optimization */
+@media (max-width: 640px) {
+  .tabs-container[data-variant="minimal"] button {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  
+  .tabs-container[data-variant="minimal"] button span:not(:first-child) {
+    display: none;
+  }
+  
+  .tabs-container[data-variant="minimal"] button span:first-child {
+    margin-right: 0;
+  }
+}
