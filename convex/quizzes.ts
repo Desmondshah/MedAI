@@ -30,16 +30,19 @@ export const create = mutation({
         question: v.string(),
         options: v.array(v.string()),
         correctAnswer: v.number(),
+        explanation: v.optional(v.string()), // <<-- ADD THIS LINE
       })
     ),
+    difficulty: v.optional(v.string()), // If storing difficulty
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("quizzes", {
       userId: args.userId,
       title: args.title,
-      questions: args.questions,
+      questions: args.questions, // Now args.questions can include 'explanation'
       score: undefined,
       takenAt: undefined,
+     difficulty: args.difficulty,
     });
   },
 });

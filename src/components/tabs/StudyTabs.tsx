@@ -1,46 +1,75 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import { toast } from "sonner";
-import { 
-  BookOpen, 
-  Book, 
-  X, 
-  AlertCircle, 
-  Play, 
-  ChevronRight, 
-  PlusCircle, 
-  RotateCcw, 
-  CheckCircle, 
-  Brain, 
-  Bookmark, 
-  Filter, 
-  Search, 
-  ChevronDown, 
-  Sparkles, 
-  Activity, 
-  Calendar, 
-  Clock, 
-  BarChart, 
-  ListOrdered 
+import {
+  BookOpen,
+  Book,
+  X,
+  AlertCircle,
+  Play,
+  ChevronRight,
+  PlusCircle,
+  RotateCcw,
+  CheckCircle,
+  Brain,
+  Bookmark,
+  Filter,
+  Search,
+  ChevronDown,
+  Sparkles,
+  Activity,
+  Calendar,
+  Clock,
+  BarChart,
+  ListOrdered,
+  FileText,
+  Zap,
+  Settings,
+  Target,
+  TrendingUp,
+  Eye,
+  Copy,
+  Save,
+  Loader2,
+  Info,
+  Moon,
+  Sun,
+  LayoutGrid,
+  ListChecks,
+  Trash2,
+  Edit3,
+  Plus,
+  ArrowLeft, // Added
 } from "lucide-react";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle, 
-  CardFooter 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
 } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Textarea } from "../../components/ui/textarea";
 import { Input } from "../../components/ui/input";
 import { Progress } from "../../components/ui/progress";
 import StudyCard from "../ui/StudyCard";
+import { Badge } from "../../components/ui/badge";
+// Removed custom Select imports
+import { motion, AnimatePresence } from "framer-motion";
 
 interface UserAwareProps {
   userId: Id<"users">;
+}
+
+interface FlashcardSet {
+  id: string;
+  title: string;
+  cards: Flashcard[];
+  source?: string;
+  createdAt?: number;
 }
 
 interface Flashcard {
@@ -49,1239 +78,869 @@ interface Flashcard {
   category?: string;
   lastReviewed?: number;
   confidence?: number;
+  _id?: Id<"flashcards">;
+  _creationTime?: number;
 }
 
 interface QuizQuestion {
   question: string;
   options: string[];
-  correctAnswer: number;
+  correctAnswer: number; // Index of the correct option
+  explanation?: string;
 }
 
 interface Quiz {
+  _id?: Id<"quizzes">;
   title: string;
   questions: QuizQuestion[];
+  score?: number;
+  takenAt?: number;
+  difficulty?: string;
 }
+
+interface ProgressItem {
+    _id?: Id<"progress">;
+    topic: string;
+    confidence: number;
+    lastReviewed: number;
+}
+
+const formatDate = (timestamp: number | Date | undefined, options?: Intl.DateTimeFormatOptions): string => {
+    if (timestamp === undefined) return 'N/A';
+    const defaultOptions: Intl.DateTimeFormatOptions = {
+      year: 'numeric', month: 'short', day: 'numeric',
+    };
+    return new Date(timestamp).toLocaleDateString(undefined, options || defaultOptions);
+};
+
 
 export function FlashcardsTab({ userId }: UserAwareProps) {
   const [topic, setTopic] = useState<string>("");
   const [content, setContent] = useState<string>("");
-  const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
+  const [generatedFlashcards, setGeneratedFlashcards] = useState<Flashcard[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [reviewMode, setReviewMode] = useState<boolean>(false);
+  const [reviewingSet, setReviewingSet] = useState<FlashcardSet | null>(null);
   const [currentCardIndex, setCurrentCardIndex] = useState<number>(0);
-  const [flipped, setFlipped] = useState<boolean>(false);
-  const [savedDecks, setSavedDecks] = useState<{ category: string; count: number }[]>([]);
-  const [selectedDeck, setSelectedDeck] = useState<string | null>(null);
-  const [deckFlashcards, setDeckFlashcards] = useState<Flashcard[]>([]);
-  const [error, setError] = useState<string | null>(null);
-
-  // API connections
-  const generateFlashcards = useAction(api.ai.generateFlashcards);
-  const createFlashcardBatch = useMutation(api.flashcards.createBatch);
-  const allFlashcards = useQuery(api.flashcards.getAll, { userId });
   
-  // Get flashcards by category when a deck is selected
-  const categoryFlashcards = useQuery(
-    api.flashcards.getByCategory, 
-    selectedDeck ? { userId, category: selectedDeck } : "skip"
-  );
+  const [error, setError] = useState<string | null>(null);
+  const [darkMode, setDarkMode] = useState<boolean>(false);
 
-  // Group flashcards by category when data changes
+  const generateFlashcardsAction = useAction(api.ai.generateFlashcards);
+  const createFlashcardBatchMutation = useMutation(api.flashcards.createBatch);
+  const allFlashcardsQuery = useQuery(api.flashcards.getAll, { userId });
+
+  const [savedDecks, setSavedDecks] = useState<FlashcardSet[]>([]);
+
   useEffect(() => {
-    if (allFlashcards) {
-      const decksByCategory: Record<string, number> = {};
-      
-      allFlashcards.forEach(card => {
+    if (darkMode) document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
+  }, [darkMode]);
+
+  useEffect(() => {
+    if (allFlashcardsQuery) {
+      const decksMap = new Map<string, Flashcard[]>();
+      allFlashcardsQuery.forEach(card => {
         const category = card.category || "Uncategorized";
-        decksByCategory[category] = (decksByCategory[category] || 0) + 1;
+        if (!decksMap.has(category)) {
+          decksMap.set(category, []);
+        }
+        decksMap.get(category)?.push({
+            front: card.front,
+            back: card.back,
+            category: card.category,
+            _id: card._id,
+            _creationTime: card._creationTime,
+            confidence: card.confidence,
+            lastReviewed: card.lastReviewed
+        });
       });
-      
-      const formattedDecks = Object.entries(decksByCategory).map(([category, count]) => ({
-        category,
-        count
-      }));
-      
+      const formattedDecks: FlashcardSet[] = Array.from(decksMap.entries()).map(([title, cards]) => ({
+        id: title,
+        title,
+        cards,
+        source: "Saved Deck",
+        createdAt: cards[0]?._creationTime
+      })).sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
       setSavedDecks(formattedDecks);
     }
-  }, [allFlashcards]);
+  }, [allFlashcardsQuery]);
 
-  // Update deckFlashcards when categoryFlashcards changes
-  useEffect(() => {
-    if (categoryFlashcards && categoryFlashcards.length > 0) {
-      setDeckFlashcards(categoryFlashcards);
-      // If we're in review mode, make sure we have the right card index
-      if (reviewMode && categoryFlashcards.length > 0) {
-        setCurrentCardIndex(Math.min(currentCardIndex, categoryFlashcards.length - 1));
-      }
-    }
-  }, [categoryFlashcards, reviewMode, currentCardIndex]);
 
   const handleGenerateFlashcards = async () => {
     if (!topic.trim()) {
-      toast.error("Please enter a topic first");
+      toast.error("Please enter a topic to generate flashcards.");
       return;
     }
-    
-    setError(null);
     setIsLoading(true);
-    
+    setError(null);
+    setGeneratedFlashcards([]);
     try {
-      // Log the request for debugging
-      console.log("Calling AI to generate flashcards with:", {
+      const response = await generateFlashcardsAction({
         topic: topic.trim(),
-        contentLength: content.trim().length || 0
+        content: content.trim() || undefined,
       });
-      
-      // Use the AI action to generate flashcards
-      const response = await generateFlashcards({ 
-        topic: topic.trim(), 
-        content: content.trim() || undefined 
-      });
-      
-      console.log("Received flashcards response:", response);
-      
-      // Check if we got valid flashcards
-      if (response && Array.isArray(response) && response.length > 0) {
-        setFlashcards(response);
-        
-        try {
-          console.log("Saving flashcards to database:", response);
-          
-          // Save flashcards to database
-          const savedIds = await createFlashcardBatch({
-            userId,
-            cards: response.map(card => ({
-              ...card,
-              category: topic.trim()
-            }))
-          });
-          
-          console.log("Successfully saved flashcards:", savedIds);
-          toast.success(`${response.length} flashcards created successfully!`);
-        } catch (dbError: unknown) {
-          console.error("Database error saving flashcards:", dbError);
-          const errorMessage = dbError instanceof Error ? dbError.message : "Unknown database error";
-          setError(`Error saving flashcards: ${errorMessage}`);
-          toast.error(`Error saving flashcards: ${errorMessage}`);
-        }
+      if (response && response.length > 0) {
+        const newCards = response.map((card, index) => ({ ...card, id: `gen-${index}` }));
+        setGeneratedFlashcards(newCards);
+        toast.success(`${response.length} flashcards generated for "${topic.trim()}"!`);
       } else {
-        console.error("No valid flashcards returned from AI");
-        setError("No flashcards could be generated. Please try a different topic or provide more content.");
-        toast.error("No flashcards could be generated. Please try a different topic or provide more detailed content.");
+        setError("No flashcards could be generated. Try refining your topic or adding more content.");
+        toast.info("No flashcards generated. Try a different input.");
       }
-    } catch (error: unknown) {
-      console.error("Error generating flashcards:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      setError(`Error generating flashcards: ${errorMessage}`);
-      toast.error(`Failed to generate flashcards: ${errorMessage}`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      setError(`Failed to generate flashcards: ${msg}`);
+      toast.error(`Generation failed: ${msg}`);
     } finally {
       setIsLoading(false);
     }
   };
+  
+  const handleSaveGeneratedCards = async () => {
+    if (generatedFlashcards.length === 0) return;
+    setIsLoading(true);
+    try {
+        const cardsToSave = generatedFlashcards.map(card => ({
+            front: card.front,
+            back: card.back,
+            category: topic.trim() || "Generated Deck"
+        }));
+        await createFlashcardBatchMutation({ userId, cards: cardsToSave });
+        toast.success("Flashcards saved successfully to your decks!");
+        setGeneratedFlashcards([]);
+        setTopic("");
+        setContent("");
+    } catch (error) {
+        toast.error("Failed to save flashcards.");
+        console.error("Error saving flashcards:", error);
+    } finally {
+        setIsLoading(false);
+    }
+};
 
-  const startReview = () => {
-    if (flashcards.length === 0) {
-      toast.error("No flashcards available to review");
+  const startReview = (deck: FlashcardSet) => {
+    if (!deck.cards || deck.cards.length === 0) {
+      toast.error("This deck has no cards to review.");
       return;
     }
-    setReviewMode(true);
+    setReviewingSet(deck);
     setCurrentCardIndex(0);
-    setFlipped(false);
   };
 
-  const startDeckReview = async (category: string) => {
-    try {
-      setIsLoading(true);
-      setSelectedDeck(category);
-      
-      if (categoryFlashcards && categoryFlashcards.length > 0) {
-        setCurrentCardIndex(0);
-        setFlipped(false);
-        setReviewMode(true);
-      } else {
-        toast.error("Error loading flashcards for this deck");
-      }
-    } catch (error: unknown) {
-      console.error("Error loading deck:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      toast.error(`Failed to load flashcards: ${errorMessage}`);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const nextCard = () => {
-    const currentDeck = selectedDeck ? deckFlashcards : flashcards;
-    
-    if (currentCardIndex < currentDeck.length - 1) {
-      setCurrentCardIndex(prevIndex => prevIndex + 1);
-      setFlipped(false);
+  const handleNextCard = () => {
+    if (reviewingSet && currentCardIndex < reviewingSet.cards.length - 1) {
+      setCurrentCardIndex(prev => prev + 1);
     } else {
-      setReviewMode(false);
-      setSelectedDeck(null);
-      toast.success("Review complete!");
+      toast.success(`Finished reviewing "${reviewingSet?.title}"!`);
+      setReviewingSet(null);
     }
   };
 
-  const previousCard = () => {
+  const handlePreviousCard = () => {
     if (currentCardIndex > 0) {
-      setCurrentCardIndex(prevIndex => prevIndex - 1);
-      setFlipped(false);
+      setCurrentCardIndex(prev => prev - 1);
     }
   };
 
-  const handleMarkCard = (confidence: number) => {
-    // In a real app, this would update the card's confidence level in the database
-    console.log(`Marking card with confidence level: ${confidence}`);
-    nextCard();
+  const updateCardConfidence = useMutation(api.flashcards.updateReview);
+  const handleMarkConfidence = async (confidence: number) => {
+    if (reviewingSet) {
+        const card = reviewingSet.cards[currentCardIndex];
+        if (card._id) {
+            try {
+                await updateCardConfidence({id: card._id, confidence});
+                const updatedCards = [...reviewingSet.cards];
+                updatedCards[currentCardIndex] = {...card, confidence, lastReviewed: Date.now()};
+                setReviewingSet({...reviewingSet, cards: updatedCards});
+                toast.info(`Card marked with confidence: ${confidence}/5`);
+            } catch(err) {
+                toast.error("Failed to update card confidence.");
+            }
+        }
+        handleNextCard();
+    }
   };
 
-  const handleBookmarkCard = () => {
-    // In a real app, this would bookmark the current card
-    toast.success("Flashcard bookmarked!");
-  };
+  if (reviewingSet) {
+    const currentCard = reviewingSet.cards[currentCardIndex];
+    return (
+      <div className={`max-w-2xl mx-auto py-8 px-4 ${darkMode ? 'text-neutral-100' : ''}`}>
+        <Button variant="outline" onClick={() => setReviewingSet(null)} className="mb-6">
+          <ArrowLeft className="h-4 w-4 mr-2" /> Back to Decks {/* Corrected: Use ArrowLeft */}
+        </Button>
+        <StudyCard
+          id={currentCard._id?.toString() || `temp-${currentCardIndex}`}
+          front={currentCard.front}
+          back={currentCard.back}
+          topic={reviewingSet.title}
+          difficulty="medium"
+          onNext={handleNextCard}
+          onPrevious={handlePreviousCard}
+          onMark={handleMarkConfidence}
+          hasNext={currentCardIndex < reviewingSet.cards.length - 1}
+          hasPrevious={currentCardIndex > 0}
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 fade-in">
-      {!reviewMode ? (
-        <>
-          <Card className="card-premium overflow-hidden">
-            <CardHeader className="pb-2">
-              <div className="flex items-center mb-1">
-                <div className="p-1.5 mr-3 rounded-lg bg-blue-50">
-                  <BookOpen className="h-5 w-5 text-blue-500" />
-                </div>
-                <CardTitle className="text-2xl">Generate Flashcards</CardTitle>
-              </div>
-              <CardDescription className="text-gray-600">
-                Create high-yield medical flashcards from your notes or any medical topic
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-5">
-              <Input
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                placeholder="Topic (e.g., Cardiac Physiology, Antibiotic Classes)"
-                className="input-premium"
-              />
-              <Textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Add content to base flashcards on, or leave blank for general topic flashcards"
-                className="textarea-premium min-h-32 placeholder:text-gray-400"
-              />
-              {error && (
-                <div className="alert-premium error p-4 flex items-start space-x-3">
-                  <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-red-800">Error</p>
-                    <p className="text-sm text-red-700">{error}</p>
-                  </div>
-                </div>
-              )}
-              <Button 
-                onClick={handleGenerateFlashcards}
-                disabled={isLoading || !topic.trim()}
-                className="w-full bg-gradient-premium hover-lift"
-              >
-                {!isLoading && <Sparkles className="h-4 w-4 mr-2" />}
-                Generate Flashcards
-              </Button>
-            </CardContent>
-          </Card>
-
-          {flashcards.length > 0 && (
-            <Card className="card-premium">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xl">Generated Flashcards</CardTitle>
-                <CardDescription>{flashcards.length} flashcards created for "{topic}"</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {flashcards.slice(0, 4).map((card, index) => (
-                    <Card key={index} className="border hover:border-blue-200 hover:shadow-md transition-shadow hover-lift">
-                      <CardHeader className="p-4">
-                        <CardTitle className="text-sm">{card.front}</CardTitle>
-                      </CardHeader>
-                      <CardContent className="px-4 pb-4 pt-0">
-                        <p className="text-xs text-gray-500">Tap to see answer</p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-                <div className="flex justify-center">
-                  <Button 
-                    onClick={startReview}
-                    className="bg-gradient-premium hover-lift"
-                  >
-                    <BookOpen className="h-4 w-4 mr-2" />
-                    Start Review
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-          
-          {savedDecks.length > 0 && (
-            <Card className="card-premium">
-              <CardHeader className="pb-2">
-                <div className="flex items-center mb-1">
-                  <div className="p-1.5 mr-3 rounded-lg bg-blue-50">
-                    <BookOpen className="h-5 w-5 text-blue-500" />
-                  </div>
-                  <CardTitle className="text-xl">Your Flashcard Decks</CardTitle>
-                </div>
-                <CardDescription>Review your saved flashcards by topic</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {savedDecks.map((deck, index) => (
-                    <Card key={index} className="border bg-gradient-to-tr from-white to-gray-50 hover:shadow-md transition-shadow hover-lift">
-                      <CardContent className="p-6">
-                        <h3 className="font-medium text-lg mb-2">{deck.category}</h3>
-                        <div className="flex items-center text-sm text-gray-600 mb-4">
-                          <BookOpen className="h-4 w-4 mr-1 text-gray-400" />
-                          {deck.count} cards
-                        </div>
-                        <Button 
-                          className="w-full bg-white hover:bg-blue-50 text-blue-600 border border-blue-100 hover:border-blue-200 hover-lift" 
-                          variant="outline"
-                          onClick={() => startDeckReview(deck.category)}
-                          disabled={isLoading}
-                        >
-                          {isLoading ? "Loading..." : "Review Deck"}
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </>
-      ) : (
-        <div className="py-8">
-          <StudyCard
-            id={selectedDeck ? `${selectedDeck}-${currentCardIndex}` : `card-${currentCardIndex}`}
-            front={(selectedDeck ? deckFlashcards[currentCardIndex]?.front : flashcards[currentCardIndex]?.front) || ""}
-            back={(selectedDeck ? deckFlashcards[currentCardIndex]?.back : flashcards[currentCardIndex]?.back) || ""}
-            topic={selectedDeck || topic}
-            onNext={nextCard}
-            onPrevious={previousCard}
-            onMark={handleMarkCard}
-            onBookmark={handleBookmarkCard}
-            hasNext={currentCardIndex < (selectedDeck ? deckFlashcards.length - 1 : flashcards.length - 1)}
-            hasPrevious={currentCardIndex > 0}
-            difficulty="medium"
-            tags={["Cardiology", "Anatomy"]} // Example tags
-          />
+    <div className={`space-y-8 ${darkMode ? 'text-neutral-200' : ''}`}>
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="flex items-center">
+            <div className={`p-2.5 mr-3 rounded-xl shadow-md ${darkMode ? 'bg-purple-500' : 'bg-purple-600'}`}>
+                <BookOpen className="h-6 w-6 text-white" />
+            </div>
+            <div>
+                <h1 className={`text-3xl font-bold tracking-tight ${darkMode ? 'text-neutral-100' : 'text-gray-900'}`}>Flashcards</h1>
+                <p className={`text-sm ${darkMode ? 'text-neutral-400' : 'text-gray-500'}`}>Create, review, and master medical concepts.</p>
+            </div>
         </div>
+        <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setDarkMode(!darkMode)}
+            className={`rounded-full ${darkMode ? 'bg-neutral-800 border-neutral-700 hover:bg-neutral-700' : 'bg-white border-gray-200 hover:bg-gray-100'}`}
+            title="Toggle Theme"
+        >
+            {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+        </Button>
+      </div>
+
+      <Card className={`shadow-xl overflow-hidden ${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'}`}>
+        <CardHeader className={`border-b ${darkMode ? 'border-neutral-700 bg-neutral-800/50' : 'border-gray-100 bg-gray-50/50'}`}>
+          <div className="flex items-center gap-3">
+            <Sparkles className={`h-5 w-5 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`} />
+            <CardTitle className={`text-lg font-semibold ${darkMode ? 'text-neutral-100' : 'text-gray-800'}`}>Generate New Flashcards</CardTitle>
+          </div>
+          <CardDescription className={`text-sm mt-1 ${darkMode ? 'text-neutral-400' : 'text-gray-500'}`}>
+            Enter a topic or paste content to let AI create flashcards for you.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-5 sm:p-6 space-y-4">
+          <Input
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            placeholder="Enter Topic (e.g., Cardiac Cycle, Types of Anemia)"
+            className={`rounded-lg h-11 ${darkMode ? 'bg-neutral-700 border-neutral-600 placeholder:text-neutral-500 focus:border-blue-500 focus:ring-blue-500/30' : 'bg-white border-gray-300 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500/30'}`}
+          />
+          <Textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="Optional: Paste specific content here to generate flashcards from..."
+            className={`rounded-lg min-h-[100px] custom-scrollbar ${darkMode ? 'bg-neutral-700 border-neutral-600 placeholder:text-neutral-500 focus:border-blue-500 focus:ring-blue-500/30' : 'bg-white border-gray-200 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500/30'}`}
+          />
+          {error && <p className="text-xs text-red-500 flex items-center gap-1.5"><AlertCircle className="h-4 w-4"/>{error}</p>}
+          <div className="flex justify-end">
+            <Button onClick={handleGenerateFlashcards} disabled={isLoading || !topic.trim()} className={`rounded-lg shadow-md ${darkMode ? 'bg-purple-600 hover:bg-purple-500' : 'bg-purple-600 hover:bg-purple-700'}`}>
+              {isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin"/> : <Zap className="h-4 w-4 mr-2" />}
+              Generate with AI
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {generatedFlashcards.length > 0 && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+            <div className="flex justify-between items-center">
+                <h2 className={`text-xl font-semibold ${darkMode ? 'text-neutral-100' : 'text-gray-800'}`}>Generated Cards for "{topic}"</h2>
+                <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => startReview({id: 'generated', title: `Review: ${topic}`, cards: generatedFlashcards, source: 'Generated'})} className={`rounded-lg shadow-sm ${darkMode ? 'border-neutral-600 hover:bg-neutral-700' : 'border-gray-300 hover:bg-gray-50'}`}>
+                        <Play className="h-4 w-4 mr-2"/> Review These
+                    </Button>
+                    <Button onClick={handleSaveGeneratedCards} className={`rounded-lg shadow-sm ${darkMode ? 'bg-green-600 hover:bg-green-500' : 'bg-green-500 hover:bg-green-600'}`}>
+                        <Save className="h-4 w-4 mr-2"/> Save to My Decks
+                    </Button>
+                </div>
+            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {generatedFlashcards.slice(0, 6).map((card, index) => (
+              <Card key={`gen-${index}`} className={`p-4 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition-shadow ${darkMode ? 'bg-neutral-700 border-neutral-600 hover:border-purple-500' : 'bg-white border-gray-200 hover:border-purple-400'}`} onClick={() => startReview({id: 'generated', title: `Preview: ${topic}`, cards: [card], source: 'Generated'})}>
+                <p className={`font-medium text-sm line-clamp-2 mb-1 ${darkMode ? 'text-neutral-200' : 'text-gray-700'}`}>{card.front}</p>
+                <p className={`text-xs line-clamp-3 ${darkMode ? 'text-neutral-400' : 'text-gray-500'}`}>{card.back}</p>
+              </Card>
+            ))}
+          </div>
+        </motion.div>
       )}
+
+      <div className="space-y-4">
+        <h2 className={`text-2xl font-semibold border-b pb-2 mb-4 ${darkMode ? 'text-neutral-100 border-neutral-700' : 'text-gray-800 border-gray-200'}`}>Your Flashcard Decks</h2>
+        {savedDecks.length === 0 && !isLoading && (
+             <div className={`text-center py-10 rounded-xl ${darkMode ? 'bg-neutral-800 border border-neutral-700' : 'bg-white border border-gray-200 shadow-sm'}`}>
+                <BookOpen className={`h-12 w-12 mx-auto mb-3 ${darkMode ? 'text-neutral-500' : 'text-gray-400'}`} />
+                <h3 className={`text-lg font-medium ${darkMode ? 'text-neutral-200' : 'text-gray-700'}`}>No Saved Decks Yet</h3>
+                <p className={`mt-1 text-sm ${darkMode ? 'text-neutral-400' : 'text-gray-500'}`}>
+                    Generate flashcards above or organize existing ones into decks.
+                </p>
+            </div>
+        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {savedDecks.map((deck) => (
+            <motion.div
+                key={deck.id}
+                initial={{ opacity: 0, y:20 }} animate={{ opacity: 1, y:0 }} transition={{delay: 0.1 * savedDecks.indexOf(deck)}}
+                className={`rounded-xl shadow-lg overflow-hidden cursor-pointer group transition-all duration-300 hover:shadow-2xl hover:-translate-y-1
+                            ${darkMode ? 'bg-neutral-800 border border-neutral-700 hover:border-purple-600' : 'bg-white border-gray-200 hover:border-purple-400'}`}
+                onClick={() => startReview(deck)}
+            >
+              <div className={`p-5 border-b ${darkMode ? 'border-neutral-700' : 'border-gray-100'}`}>
+                <div className="flex justify-between items-start">
+                    <h3 className={`text-md font-semibold line-clamp-2 ${darkMode ? 'text-neutral-100' : 'text-gray-800'}`}>{deck.title}</h3>
+                    <Badge variant="outline" className={`text-xs rounded-full px-2 py-0.5 ${darkMode ? 'border-neutral-600 bg-neutral-700 text-neutral-300' : 'border-gray-300 bg-gray-50 text-gray-600'}`}>{deck.cards.length} cards</Badge>
+                </div>
+                <p className={`text-xs mt-1 ${darkMode ? 'text-neutral-500' : 'text-gray-500'}`}>Last reviewed: {deck.cards.find(c => c.lastReviewed)?.lastReviewed ? formatDate(deck.cards.find(c => c.lastReviewed)?.lastReviewed) : 'Never'}</p>
+              </div>
+              <div className="p-5">
+                <Button variant="default" className={`w-full rounded-lg shadow-md group-hover:opacity-90 transition-opacity ${darkMode ? 'bg-purple-600 hover:bg-purple-500' : 'bg-purple-600 hover:bg-purple-700'}`}>
+                    <Play className="h-4 w-4 mr-2"/> Review Deck
+                </Button>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
+
 
 export function QuizzesTab({ userId }: UserAwareProps) {
   const [topic, setTopic] = useState<string>("");
   const [difficulty, setDifficulty] = useState<string>("medium");
   const [questionCount, setQuestionCount] = useState<number>(5);
-  const [generating, setGenerating] = useState<boolean>(false);
-  const [quiz, setQuiz] = useState<Quiz | null>(null);
-  const [quizStarted, setQuizStarted] = useState<boolean>(false);
-  const [currentQuestion, setCurrentQuestion] = useState<number>(0);
-  const [answers, setAnswers] = useState<number[]>([]);
-  const [score, setScore] = useState<number>(0);
-  const [quizComplete, setQuizComplete] = useState<boolean>(false);
+  const [isGeneratingQuiz, setIsGeneratingQuiz] = useState<boolean>(false);
+  const [currentQuiz, setCurrentQuiz] = useState<Quiz | null>(null);
+  const [quizInProgress, setQuizInProgress] = useState<boolean>(false);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
+  const [userAnswers, setUserAnswers] = useState<(number | null)[]>([]);
+  const [quizScore, setQuizScore] = useState<number>(0);
+  const [isQuizComplete, setIsQuizComplete] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [darkMode, setDarkMode] = useState<boolean>(false);
 
-  // Mock a generateQuiz function since it seems to be missing from your API
-  // In a real app, you would use the actual AI action:
-  // const generateQuiz = useAction(api.ai.generateQuiz);
-  const generateQuiz = async ({ 
-    topic, 
-    difficulty, 
-    questionCount 
-  }: { 
-    topic: string; 
-    difficulty: string; 
-    questionCount: number 
-  }) => {
-    // Simulate a delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Return a mock quiz
-    return {
-      title: `Quiz on ${topic}`,
-      questions: [
-        {
-          question: "Which of the following is the most common cause of community-acquired pneumonia?",
-          options: [
-            "Streptococcus pneumoniae",
-            "Haemophilus influenzae",
-            "Klebsiella pneumoniae",
-            "Mycoplasma pneumoniae"
-          ],
-          correctAnswer: 0
-        },
-        {
-          question: "Which of the following antibiotics is most appropriate for treating MRSA infections?",
-          options: [
-            "Amoxicillin",
-            "Azithromycin",
-            "Vancomycin",
-            "Ceftriaxone"
-          ],
-          correctAnswer: 2
-        },
-        {
-          question: "A 45-year-old patient presents with fever, productive cough, and pleuritic chest pain. Which of the following diagnostic tests should be ordered first?",
-          options: [
-            "CT scan of the chest",
-            "Chest X-ray",
-            "Sputum culture",
-            "Bronchoscopy"
-          ],
-          correctAnswer: 1
-        }
-      ]
-    };
-  };
+  // Use your actual AI action for generating quizzes
+  const generateQuizActionConvex = useAction(api.ai.generateQuizQuestions); // Placeholder if you create this
+  
+  const createQuizMutation = useMutation(api.quizzes.create);
+  const updateQuizScoreMutation = useMutation(api.quizzes.updateScore);
+  const pastQuizzesQuery = useQuery(api.quizzes.getAll, { userId });
+  
+  const [pastQuizzes, setPastQuizzes] = useState<Quiz[]>([]);
 
-  const createQuiz = useMutation(api.quizzes.create);
-  const updateQuizScore = useMutation(api.quizzes.updateScore);
-  const getQuizzes = useQuery(api.quizzes.getAll, { userId });
+  useEffect(() => {
+    if (darkMode) document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
+  }, [darkMode]);
+
+  useEffect(() => {
+    if (pastQuizzesQuery) {
+        setPastQuizzes(pastQuizzesQuery.sort((a,b) => (b.takenAt || 0) - (a.takenAt || 0)));
+    }
+  }, [pastQuizzesQuery]);
+
 
   const handleGenerateQuiz = async () => {
     if (!topic.trim()) {
-      toast.error("Please enter a topic first");
+      toast.error("Please enter a quiz topic.");
       return;
     }
-    
+    setIsGeneratingQuiz(true);
     setError(null);
-    setGenerating(true);
-    
+    setCurrentQuiz(null);
+    setIsQuizComplete(false);
     try {
-      console.log("Generating quiz for:", {
-        topic: topic.trim(),
-        difficulty,
-        questionCount
+      // Replace mock with actual Convex action call
+      // const quizData = await generateQuizAction({ topic: topic.trim(), difficulty, questionCount });
+      // For now, we'll assume you'll create `generateQuizQuestions` in convex/ai.ts
+      // You'll need to define what this action returns (e.g., { title: string, questions: QuizQuestion[] })
+      const quizData = await generateQuizActionConvex({ 
+          topic: topic.trim(), 
+          difficulty, 
+          questionCount,
+          // You might need to pass a system prompt or other parameters here
+          // depending on how you structure your `generateQuizQuestions` action.
       });
-      
-      const result = await generateQuiz({ 
-        topic: topic.trim(),
-        difficulty,
-        questionCount
-      });
-      
-      console.log("Received quiz response:", result);
-      
-      if (result && result.questions && result.questions.length > 0) {
-        setQuiz(result);
-        
-        try {
-          // Save the quiz to database
-          const quizId = await createQuiz({
-            userId,
-            title: result.title || topic.trim(),
-            questions: result.questions
-          });
-          
-          console.log("Successfully saved quiz with ID:", quizId);
-          toast.success("Quiz generated successfully!");
-        } catch (dbError: unknown) {
-          console.error("Database error saving quiz:", dbError);
-          const errorMessage = dbError instanceof Error ? dbError.message : "Unknown database error";
-          setError(`Error saving quiz: ${errorMessage}`);
-          toast.error(`Error saving quiz: ${errorMessage}`);
-        }
+
+       if (quizData && quizData.questions && quizData.questions.length > 0) {
+        // Assuming quizData.questions is QuizQuestionFromAI[]
+        const transformedQuestions: QuizQuestion[] = quizData.questions.map(qFromAI => ({
+          question: qFromAI.question,
+          options: qFromAI.options,
+          correctAnswer: qFromAI.correctAnswerIndex, // Map here!
+          explanation: qFromAI.explanation,
+        }));
+
+        const quizToSave: Omit<Quiz, '_id' | 'score' | 'takenAt'> = {
+            title: quizData.title || `Quiz: ${topic.trim()}`,
+            questions: transformedQuestions, // Use the transformed questions
+            difficulty: quizData.difficulty || difficulty // Prefer difficulty from AI if provided
+        };
+        const quizId = await createQuizMutation({
+             userId,
+             title: quizToSave.title,
+             questions: quizToSave.questions,
+             // difficulty: quizToSave.difficulty, // also store difficulty if in schema
+        });
+        setCurrentQuiz({...quizToSave, _id: quizId}); // Store the transformed quiz
+        toast.success(`Quiz "${quizToSave.title}" generated!`);
       } else {
-        console.error("No valid quiz questions returned from AI");
-        setError("Could not generate quiz. Please try a different topic or difficulty level.");
-        toast.error("Could not generate quiz. Please try a different topic.");
+        setError("Could not generate quiz. AI did not return valid questions. Please try a different topic or settings.");
+        toast.info("Quiz generation failed or returned no questions.");
       }
-    } catch (error: unknown) {
-      console.error("Error generating quiz:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      setError(`Error generating quiz: ${errorMessage}`);
-      toast.error(`Failed to generate quiz: ${errorMessage}`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Unknown error during quiz generation";
+      setError(`Failed to generate quiz: ${msg}`);
+      toast.error(`Generation failed: ${msg}`);
     } finally {
-      setGenerating(false);
+      setIsGeneratingQuiz(false);
     }
   };
 
-  const startQuiz = () => {
-    if (!quiz) {
-      toast.error("No quiz available to start");
+  const startQuiz = (quizToStart?: Quiz) => {
+    const activeQuiz = quizToStart || currentQuiz;
+    if (!activeQuiz || !activeQuiz.questions || activeQuiz.questions.length === 0) {
+      toast.error("No quiz available or quiz has no questions.");
       return;
     }
-    
-    if (quiz.questions.length === 0) {
-      toast.error("Quiz contains no questions");
-      return;
-    }
-    
-    setQuizStarted(true);
-    setCurrentQuestion(0);
-    setAnswers(new Array(quiz.questions.length).fill(-1));
-    setScore(0);
-    setQuizComplete(false);
+    setCurrentQuiz(activeQuiz);
+    setQuizInProgress(true);
+    setCurrentQuestionIndex(0);
+    setUserAnswers(new Array(activeQuiz.questions.length).fill(null));
+    setQuizScore(0);
+    setIsQuizComplete(false);
   };
 
-  const answerQuestion = (questionIndex: number, answerIndex: number) => {
-    const newAnswers = [...answers];
-    newAnswers[questionIndex] = answerIndex;
-    setAnswers(newAnswers);
+  const handleAnswerSelect = (optionIndex: number) => {
+    const newAnswers = [...userAnswers];
+    newAnswers[currentQuestionIndex] = optionIndex;
+    setUserAnswers(newAnswers);
   };
 
-  const nextQuestion = () => {
-    if (!quiz) return;
-    
-    if (currentQuestion < quiz.questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
-    } else {
-      // Calculate score
-      let correctCount = 0;
-      for (let i = 0; i < quiz.questions.length; i++) {
-        if (answers[i] === quiz.questions[i].correctAnswer) {
-          correctCount++;
-        }
-      }
-      setScore(correctCount);
-      setQuizComplete(true);
-      
-      // Save score to database (if we had a quiz ID from creation)
-      // updateQuizScore({ id: quizId, score: correctCount });
-    }
-  };
-
-  const startSavedQuiz = (savedQuiz: any) => {
-    try {
-      console.log("Starting saved quiz:", savedQuiz);
-      
-      // First set the quiz
-      const newQuiz = {
-        title: savedQuiz.title,
-        questions: savedQuiz.questions
-      };
-      
-      // Make sure we have valid questions
-      if (!newQuiz.questions || !Array.isArray(newQuiz.questions) || newQuiz.questions.length === 0) {
-        toast.error("This quiz doesn't contain any valid questions");
+  const handleNextQuestion = () => {
+    if (!currentQuiz) return;
+    if (userAnswers[currentQuestionIndex] === null) {
+        toast.error("Please select an answer.");
         return;
+    }
+    if (currentQuestionIndex < currentQuiz.questions.length - 1) {
+      setCurrentQuestionIndex(prev => prev + 1);
+    } else {
+      let score = 0;
+      currentQuiz.questions.forEach((q, index) => {
+        if (userAnswers[index] === q.correctAnswer) {
+          score++;
+        }
+      });
+      setQuizScore(score);
+      setIsQuizComplete(true);
+      setQuizInProgress(false);
+      if(currentQuiz._id) {
+        updateQuizScoreMutation({ id: currentQuiz._id, score });
       }
-      
-      setQuiz(newQuiz);
-      
-      // Then start the quiz with a slight delay to ensure the quiz state is updated
-      setTimeout(() => {
-        setQuizStarted(true);
-        setCurrentQuestion(0);
-        setAnswers(new Array(savedQuiz.questions.length).fill(-1));
-        setScore(0);
-        setQuizComplete(false);
-      }, 100);
-    } catch (error: unknown) {
-      console.error("Error starting saved quiz:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      toast.error(`Failed to start saved quiz: ${errorMessage}`);
+      toast.success("Quiz completed! Results are shown below.");
     }
   };
 
+  const resetQuizGenerator = () => {
+    setCurrentQuiz(null);
+    setTopic("");
+    setDifficulty("medium");
+    setQuestionCount(5);
+    setIsQuizComplete(false);
+    setError(null);
+  };
+
+  if (quizInProgress && currentQuiz) {
+    const question = currentQuiz.questions[currentQuestionIndex];
+    return (
+        <div className={`max-w-3xl mx-auto py-8 px-4 ${darkMode ? 'text-neutral-100' : ''}`}>
+            <Card className={`shadow-xl ${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'}`}>
+                <CardHeader className={`border-b ${darkMode ? 'border-neutral-700' : 'border-gray-100'}`}>
+                    <div className="flex justify-between items-center">
+                        <CardTitle className={`text-xl font-semibold ${darkMode ? 'text-neutral-100' : 'text-gray-800'}`}>{currentQuiz.title}</CardTitle>
+                        <Badge variant="outline" className={`${darkMode ? 'border-neutral-600 bg-neutral-700' : 'border-gray-300 bg-gray-50'}`}>
+                            Question {currentQuestionIndex + 1} of {currentQuiz.questions.length}
+                        </Badge>
+                    </div>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                    <Progress value={((currentQuestionIndex + 1) / currentQuiz.questions.length) * 100} className="mb-4 h-2" />
+                    <p className={`text-lg font-medium ${darkMode ? 'text-neutral-200' : 'text-gray-700'}`}>{question.question}</p>
+                    <div className="space-y-3">
+                        {question.options.map((option, index) => (
+                        <Button
+                            key={index}
+                            variant={userAnswers[currentQuestionIndex] === index ? "default" : "outline"}
+                            className={`w-full justify-start text-left h-auto py-3 px-4 rounded-lg transition-all duration-150
+                                        ${userAnswers[currentQuestionIndex] === index 
+                                            ? (darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')
+                                            : (darkMode ? 'bg-neutral-700 border-neutral-600 hover:bg-neutral-600 text-neutral-300' : 'bg-white border-gray-300 hover:bg-gray-100 text-gray-700')}
+                                        `}
+                            onClick={() => handleAnswerSelect(index)}
+                        >
+                            <span className={`mr-3 h-5 w-5 rounded-full border-2 flex items-center justify-center ${userAnswers[currentQuestionIndex] === index ? (darkMode ? 'border-blue-400 bg-blue-500' : 'border-blue-300 bg-blue-600') : (darkMode ? 'border-neutral-500' : 'border-gray-400')}`}>
+                                {userAnswers[currentQuestionIndex] === index && <CheckCircle className="h-3 w-3 text-white"/>}
+                            </span>
+                            {option}
+                        </Button>
+                        ))}
+                    </div>
+                </CardContent>
+                <CardFooter className={`border-t pt-4 ${darkMode ? 'border-neutral-700' : 'border-gray-100'}`}>
+                    <Button onClick={handleNextQuestion} disabled={userAnswers[currentQuestionIndex] === null} className="w-full rounded-lg shadow-md">
+                        {currentQuestionIndex < currentQuiz.questions.length - 1 ? "Next Question" : "Finish Quiz"}
+                        <ChevronRight className="h-4 w-4 ml-2"/>
+                    </Button>
+                </CardFooter>
+            </Card>
+        </div>
+    );
+  }
+
+  if (isQuizComplete && currentQuiz) {
+    return (
+        <div className={`max-w-3xl mx-auto py-8 px-4 ${darkMode ? 'text-neutral-100' : ''}`}>
+            <Card className={`shadow-xl ${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'}`}>
+                <CardHeader className={`text-center border-b ${darkMode ? 'border-neutral-700' : 'border-gray-100'}`}>
+                    <CheckCircle className={`h-16 w-16 mx-auto mb-3 ${quizScore / currentQuiz.questions.length >= 0.7 ? 'text-green-500' : 'text-orange-500'}`} />
+                    <CardTitle className={`text-2xl font-bold ${darkMode ? 'text-neutral-100' : 'text-gray-800'}`}>Quiz Completed!</CardTitle>
+                    <CardDescription className={`text-lg ${darkMode ? 'text-neutral-300' : 'text-gray-600'}`}>You scored {quizScore} out of {currentQuiz.questions.length}</CardDescription>
+                    <Progress value={(quizScore / currentQuiz.questions.length) * 100} className={`mt-4 h-3 ${quizScore / currentQuiz.questions.length >= 0.7 ? 'bg-green-200 dark:bg-green-700 progress-bar-green' : 'bg-orange-200 dark:bg-orange-700 progress-bar-orange'}`} />
+                </CardHeader>
+                <CardContent className="p-6 space-y-4 max-h-[50vh] overflow-y-auto custom-scrollbar">
+                    <h3 className={`text-lg font-semibold ${darkMode ? 'text-neutral-200' : 'text-gray-700'}`}>Review Your Answers:</h3>
+                    {currentQuiz.questions.map((q, index) => (
+                        <div key={index} className={`p-4 rounded-lg border-l-4 ${userAnswers[index] === q.correctAnswer ? (darkMode ? 'border-green-500 bg-neutral-700/50' : 'border-green-400 bg-green-50') : (darkMode ? 'border-red-500 bg-neutral-700/50' : 'border-red-400 bg-red-50')}`}>
+                            <p className={`font-medium mb-1 ${darkMode ? 'text-neutral-200' : 'text-gray-800'}`}>{index + 1}. {q.question}</p>
+                            <p className={`text-sm ${userAnswers[index] === q.correctAnswer ? (darkMode ? 'text-green-400':'text-green-600') : (darkMode ? 'text-red-400':'text-red-600')}`}>
+                                Your answer: {q.options[userAnswers[index]!] || "Not answered"} {userAnswers[index] === q.correctAnswer ? <CheckCircle className="inline h-4 w-4 ml-1"/> : <X className="inline h-4 w-4 ml-1"/>}
+                            </p>
+                            {userAnswers[index] !== q.correctAnswer && <p className={`text-sm ${darkMode ? 'text-neutral-400':'text-gray-600'}`}>Correct answer: {q.options[q.correctAnswer]}</p>}
+                            {q.explanation && <p className={`text-xs mt-1 p-2 rounded ${darkMode ? 'bg-neutral-700 text-neutral-300':'bg-gray-100 text-gray-500'}`}>Explanation: {q.explanation}</p>}
+                        </div>
+                    ))}
+                </CardContent>
+                 <CardFooter className={`border-t pt-4 flex flex-col sm:flex-row justify-between gap-2 ${darkMode ? 'border-neutral-700' : 'border-gray-100'}`}>
+                    <Button variant="outline" onClick={() => startQuiz()} className="w-full sm:w-auto rounded-lg">
+                        <RotateCcw className="h-4 w-4 mr-2"/> Retry Quiz
+                    </Button>
+                    <Button onClick={resetQuizGenerator} className="w-full sm:w-auto rounded-lg">
+                        <PlusCircle className="h-4 w-4 mr-2"/> Create New Quiz
+                    </Button>
+                </CardFooter>
+            </Card>
+        </div>
+    );
+  }
+  
   return (
-    <div className="max-w-6xl mx-auto fade-in space-y-6">
-      {!quiz || (!quizStarted && !quizComplete) ? (
-        <Card className="card-premium">
-          <CardHeader className="pb-2">
-            <div className="flex items-center mb-1">
-              <div className="p-1.5 mr-3 rounded-lg bg-blue-50">
-                <Book className="h-5 w-5 text-blue-500" />
-              </div>
-              <CardTitle className="text-2xl">Practice Quizzes</CardTitle>
+    <div className={`space-y-8 ${darkMode ? 'text-neutral-200' : ''}`}>
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="flex items-center">
+                <div className={`p-2.5 mr-3 rounded-xl shadow-md ${darkMode ? 'bg-teal-500' : 'bg-teal-600'}`}>
+                    <Book className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                    <h1 className={`text-3xl font-bold tracking-tight ${darkMode ? 'text-neutral-100' : 'text-gray-900'}`}>Practice Quizzes</h1>
+                    <p className={`text-sm ${darkMode ? 'text-neutral-400' : 'text-gray-500'}`}>Test your knowledge with AI-generated quizzes.</p>
+                </div>
             </div>
-            <CardDescription className="text-gray-600">
-              Test your knowledge with AI-generated quizzes on any medical topic
+            <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setDarkMode(!darkMode)}
+                className={`rounded-full ${darkMode ? 'bg-neutral-800 border-neutral-700 hover:bg-neutral-700' : 'bg-white border-gray-200 hover:bg-gray-100'}`}
+                title="Toggle Theme"
+            >
+                {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </Button>
+        </div>
+
+      <Card className={`shadow-xl overflow-hidden ${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'}`}>
+        <CardHeader className={`border-b ${darkMode ? 'border-neutral-700 bg-neutral-800/50' : 'border-gray-100 bg-gray-50/50'}`}>
+            <div className="flex items-center gap-3">
+                <Sparkles className={`h-5 w-5 ${darkMode ? 'text-teal-400' : 'text-teal-600'}`} />
+                <CardTitle className={`text-lg font-semibold ${darkMode ? 'text-neutral-100' : 'text-gray-800'}`}>Generate a New Quiz</CardTitle>
+            </div>
+            <CardDescription className={`text-sm mt-1 ${darkMode ? 'text-neutral-400' : 'text-gray-500'}`}>
+                Customize your quiz by topic, difficulty, and number of questions.
             </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            <Input
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              placeholder="Quiz topic (e.g., Respiratory Infections, Cardiology Board Review)"
-              className="input-premium"
-            />
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Difficulty
-                </label>
-                <div className="relative">
-                  <select 
-                    className="input-premium appearance-none w-full pr-8 cursor-pointer"
+        </CardHeader>
+        <CardContent className="p-5 sm:p-6 space-y-5">
+          <Input
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            placeholder="Enter Quiz Topic (e.g., Endocrine System, Antibiotics)"
+            className={`rounded-lg h-11 ${darkMode ? 'bg-neutral-700 border-neutral-600 placeholder:text-neutral-500 focus:border-blue-500 focus:ring-blue-500/30' : 'bg-white border-gray-300 placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500/30'}`}
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+                <label htmlFor="quizDifficulty" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-neutral-300' : 'text-gray-700'}`}>Difficulty</label>
+                <select
+                    id="quizDifficulty"
                     value={difficulty}
                     onChange={(e) => setDifficulty(e.target.value)}
-                  >
-                    <option value="easy">Easy</option>
-                    <option value="medium">Medium</option>
-                    <option value="hard">Hard</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Number of Questions
-                </label>
-                <div className="relative">
-                  <select 
-                    className="input-premium appearance-none w-full pr-8 cursor-pointer"
-                    value={questionCount}
-                    onChange={(e) => setQuestionCount(parseInt(e.target.value))}
-                  >
-                    <option value="3">3</option>
-                    <option value="5">5</option>
-                    <option value="10">10</option>
-                    <option value="15">15</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                </div>
-              </div>
-            </div>
-            
-            {error && (
-              <div className="alert-premium error p-4 flex items-start space-x-3">
-                <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
-                <div>
-                  <p className="font-medium text-red-800">Error</p>
-                  <p className="text-sm text-red-700">{error}</p>
-                </div>
-              </div>
-            )}
-            
-            <Button 
-              onClick={handleGenerateQuiz}
-              disabled={generating || !topic.trim()}
-              className="w-full bg-gradient-premium hover-lift"
-            >
-              {!generating && <Book className="h-4 w-4 mr-2" />}
-              Generate Quiz
-            </Button>
-          </CardContent>
-        </Card>
-      ) : quizComplete ? (
-        <Card className="card-premium overflow-hidden">
-          <CardHeader className="pb-2 border-b">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="p-1.5 mr-3 rounded-lg bg-green-50">
-                  <CheckCircle className="h-5 w-5 text-green-500" />
-                </div>
-                <div>
-                  <CardTitle className="text-2xl">Quiz Results</CardTitle>
-                  <CardDescription className="text-gray-600">
-                    You scored {score} out of {quiz.questions.length} ({Math.round((score / quiz.questions.length) * 100)}%)
-                  </CardDescription>
-                </div>
-              </div>
-              <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-premium">
-                {score}/{quiz.questions.length}
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-6 space-y-6">
-            <div className="relative pt-6">
-              <Progress 
-                value={(score / quiz.questions.length) * 100} 
-                className={score / quiz.questions.length > 0.6 ? "bg-green-100" : "bg-blue-100"}
-                size="lg"
-              />
-              <div className="absolute top-0 left-0 w-full text-center">
-                <span className="inline-block bg-white px-2 py-1 text-sm font-medium rounded-full shadow-sm">
-                  {Math.round((score / quiz.questions.length) * 100)}%
-                </span>
-              </div>
-            </div>
-            
-            <div className="space-y-4 mt-8">
-              <h3 className="text-lg font-semibold text-gray-900">Question Review</h3>
-              {quiz.questions.map((q, index) => (
-                <Card 
-                  key={index} 
-                  className={`border-l-4 ${
-                    answers[index] === q.correctAnswer 
-                      ? 'border-l-green-500 bg-green-50' 
-                      : 'border-l-red-500 bg-red-50'
-                  } hover-lift overflow-hidden`}
+                    className={`w-full rounded-lg h-11 px-3 border ${darkMode ? 'bg-neutral-700 border-neutral-600 text-neutral-200 focus:border-blue-500 focus:ring-blue-500/30' : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500/30'}`}
                 >
-                  <CardContent className="p-5">
-                    <div className="flex items-start">
-                      <div className={`p-1.5 mr-3 rounded-full ${
-                        answers[index] === q.correctAnswer 
-                          ? 'bg-green-100' 
-                          : 'bg-red-100'
-                      } mt-0.5`}>
-                        {answers[index] === q.correctAnswer 
-                          ? <CheckCircle className="h-5 w-5 text-green-600" />
-                          : <X className="h-5 w-5 text-red-600" />
-                        }
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-900">{q.question}</p>
-                        <div className="mt-3 space-y-2">
-                          {q.options.map((option, optIndex) => (
-                            <div 
-                              key={optIndex} 
-                              className={`p-3 rounded-lg border ${
-                                optIndex === q.correctAnswer 
-                                  ? 'bg-green-100 border-green-200 text-green-800' 
-                                  : answers[index] === optIndex && optIndex !== q.correctAnswer 
-                                    ? 'bg-red-100 border-red-200 text-red-800' 
-                                    : 'bg-white border-gray-200 text-gray-600'
-                              } flex justify-between items-center`}
-                            >
-                              <span>{option}</span>
-                              {optIndex === q.correctAnswer && 
-                                <span className="bg-green-200 text-green-800 p-1 rounded-full">
-                                  <CheckCircle className="h-4 w-4" />
-                                </span>
-                              }
-                              {answers[index] === optIndex && optIndex !== q.correctAnswer && 
-                                <span className="bg-red-200 text-red-800 p-1 rounded-full">
-                                  <X className="h-4 w-4" />
-                                </span>
-                              }
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium (Recommended)</option>
+                    <option value="hard">Hard</option>
+                </select>
+            </div>
+            <div>
+                <label htmlFor="questionCount" className={`block text-sm font-medium mb-1 ${darkMode ? 'text-neutral-300' : 'text-gray-700'}`}>Number of Questions</label>
+                 <select
+                    id="questionCount"
+                    value={questionCount.toString()}
+                    onChange={(e) => setQuestionCount(parseInt(e.target.value))} // Corrected: type 'e' as React.ChangeEvent<HTMLSelectElement>
+                    className={`w-full rounded-lg h-11 px-3 border ${darkMode ? 'bg-neutral-700 border-neutral-600 text-neutral-200 focus:border-blue-500 focus:ring-blue-500/30' : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500/30'}`}
+                >
+                    <option value="3">3 Questions</option>
+                    <option value="5">5 Questions</option>
+                    <option value="10">10 Questions</option>
+                    <option value="15">15 Questions</option>
+                </select>
+            </div>
+          </div>
+          {error && <p className="text-xs text-red-500 flex items-center gap-1.5"><AlertCircle className="h-4 w-4"/>{error}</p>}
+          <div className="flex flex-col sm:flex-row justify-end gap-3">
+            {currentQuiz && !isGeneratingQuiz && (
+                 <Button variant="outline" onClick={() => startQuiz()} className={`rounded-lg shadow-sm w-full sm:w-auto ${darkMode ? 'border-neutral-600 hover:bg-neutral-700' : 'border-gray-300 hover:bg-gray-50'}`}>
+                    <Play className="h-4 w-4 mr-2"/> Start Generated Quiz
+                </Button>
+            )}
+            <Button onClick={handleGenerateQuiz} disabled={isGeneratingQuiz || !topic.trim()} className={`rounded-lg shadow-md w-full sm:w-auto ${darkMode ? 'bg-teal-600 hover:bg-teal-500' : 'bg-teal-600 hover:bg-teal-700'}`}>
+              {isGeneratingQuiz ? <Loader2 className="h-4 w-4 mr-2 animate-spin"/> : <Sparkles className="h-4 w-4 mr-2" />}
+              {currentQuiz ? "Regenerate Quiz" : "Generate Quiz"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+        {pastQuizzes.length > 0 && (
+            <div className="space-y-4 mt-8">
+                <h2 className={`text-2xl font-semibold border-b pb-2 mb-4 ${darkMode ? 'text-neutral-100 border-neutral-700' : 'text-gray-800 border-gray-200'}`}>Past Quizzes</h2>
+                <div className="space-y-3">
+                    {pastQuizzes.map(quiz => (
+                        <Card key={quiz._id?.toString()} className={`p-4 rounded-lg shadow-md flex justify-between items-center group ${darkMode ? 'bg-neutral-800 border-neutral-700 hover:bg-neutral-700/70' : 'bg-white border-gray-200 hover:bg-gray-50'}`}>
+                            <div>
+                                <h3 className={`font-medium ${darkMode ? 'text-neutral-100' : 'text-gray-800'}`}>{quiz.title}</h3>
+                                <p className={`text-xs ${darkMode ? 'text-neutral-400' : 'text-gray-500'}`}>
+                                    Taken: {quiz.takenAt ? formatDate(quiz.takenAt) : 'Not taken'} | 
+                                    Score: {quiz.score !== undefined ? `${quiz.score}/${quiz.questions.length}` : 'N/A'} | 
+                                    {quiz.difficulty ? ` Difficulty: ${quiz.difficulty.charAt(0).toUpperCase() + quiz.difficulty.slice(1)}` : ''}
+                                </p>
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            
-            <div className="flex justify-between pt-4 border-t">
-              <Button 
-                variant="outline" 
-                onClick={() => {setQuiz(null); setTopic("");}}
-                className="hover-lift"
-              >
-                <PlusCircle className="h-4 w-4 mr-2" />
-                Create New Quiz
-              </Button>
-              <Button 
-                onClick={() => {setQuizStarted(false); setQuizComplete(false);}}
-                className="bg-gradient-premium hover-lift"
-              >
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Retry Quiz
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card className="card-premium">
-          <CardHeader className="pb-2 border-b">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-xl text-transparent bg-clip-text bg-gradient-premium">{quiz.title}</CardTitle>
-                <CardDescription className="text-gray-600">
-                  Question {currentQuestion + 1} of {quiz.questions.length}
-                </CardDescription>
-              </div>
-              <div className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} difficulty
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-6 space-y-6">
-            <div className="relative pt-2">
-              <Progress value={((currentQuestion + 1) / quiz.questions.length) * 100} size="lg" />
-              <div className="flex justify-between mt-1 text-xs text-gray-500">
-                <span>Question {currentQuestion + 1}</span>
-                <span>{quiz.questions.length} total</span>
-              </div>
-            </div>
-            
-            <div className="p-6 bg-gradient-secondary rounded-xl">
-              <h3 className="text-lg font-medium text-gray-900 mb-6">{quiz.questions[currentQuestion].question}</h3>
-              <div className="space-y-3">
-                {quiz.questions[currentQuestion].options.map((option, index) => (
-                  <div 
-                    key={index}
-                    className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                      answers[currentQuestion] === index 
-                        ? 'bg-blue-50 border-blue-200 shadow-md' 
-                        : 'bg-white border-gray-200 hover:border-blue-200 hover:bg-blue-50/50 hover:shadow-sm'
-                    }`}
-                    onClick={() => answerQuestion(currentQuestion, index)}
-                  >
-                    <div className="flex items-center">
-                      <div className={`w-5 h-5 rounded-full border ${
-                        answers[currentQuestion] === index 
-                          ? 'border-blue-500 bg-blue-500' 
-                          : 'border-gray-300'
-                      } mr-3 flex items-center justify-center`}>
-                        {answers[currentQuestion] === index && (
-                          <div className="w-2 h-2 rounded-full bg-white"></div>
-                        )}
-                      </div>
-                      <span className={answers[currentQuestion] === index ? 'text-blue-700 font-medium' : ''}>{option}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div className="flex justify-end">
-              <Button 
-                onClick={nextQuestion}
-                disabled={answers[currentQuestion] === -1}
-                className="bg-gradient-premium hover-lift"
-              >
-                {currentQuestion < quiz.questions.length - 1 ? "Next Question" : "Finish Quiz"}
-                <ChevronRight className="h-4 w-4 ml-2" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-      
-      {getQuizzes && getQuizzes.length > 0 && !quizStarted && !quizComplete && (
-        <Card className="card-premium">
-          <CardHeader className="pb-2">
-            <div className="flex items-center mb-1">
-              <div className="p-1.5 mr-3 rounded-lg bg-blue-50">
-                <BookOpen className="h-5 w-5 text-blue-500" />
-              </div>
-              <CardTitle className="text-xl">Your Quizzes</CardTitle>
-            </div>
-            <CardDescription className="text-gray-600">Review your past quizzes or start a new one</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {getQuizzes.slice(0, 5).map((savedQuiz, index) => (
-                <div key={index} className="flex justify-between items-center p-3 border border-gray-100 rounded-lg hover:border-blue-100 hover:bg-blue-50/20 transition-colors group">
-                  <div>
-                    <h3 className="font-medium text-gray-900">{savedQuiz.title}</h3>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Book className="h-3.5 w-3.5 mr-1 text-gray-400" />
-                      <span>{savedQuiz.questions.length} questions</span>
-                      <span className="mx-2">•</span>
-                      {savedQuiz.score !== undefined ? (
-                        <div className="flex items-center">
-                          <span className={`${
-                            (savedQuiz.score / savedQuiz.questions.length) > 0.7 
-                              ? 'text-green-600' 
-                              : (savedQuiz.score / savedQuiz.questions.length) > 0.4 
-                                ? 'text-amber-600' 
-                                : 'text-red-600'
-                          }`}>
-                            Score: {savedQuiz.score}/{savedQuiz.questions.length}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-blue-600">Not taken</span>
-                      )}
-                    </div>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => startSavedQuiz(savedQuiz)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity hover-lift"
-                  >
-                    <Play className="h-4 w-4 mr-1" />
-                    Start Quiz
-                  </Button>
+                            <Button variant="outline" size="sm" onClick={() => startQuiz(quiz)} className={`rounded-md shadow-sm opacity-0 group-hover:opacity-100 transition-opacity ${darkMode ? 'border-neutral-600 hover:bg-neutral-700' : 'border-gray-300 hover:bg-gray-100'}`}>
+                                <Play className="h-4 w-4 mr-1.5"/> Review / Retry
+                            </Button>
+                        </Card>
+                    ))}
                 </div>
-              ))}
             </div>
-          </CardContent>
-        </Card>
-      )}
+        )}
     </div>
   );
 }
 
+
 export function ProgressTab({ userId }: UserAwareProps) {
-  // API connections
-  const getProgress = useQuery(api.progress.getAll, { userId });
-  // Mock a suggestReviewContent function since it seems to be missing from your API
-  // In a real app, you would use the actual AI action:
-  // const suggestReview = useAction(api.ai.suggestReviewContent);
-  const [reviewPlan, setReviewPlan] = useState("");
-  const [suggestedTopics, setSuggestedTopics] = useState<{topic: string, priority: string}[]>([]);
-  const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [darkMode, setDarkMode] = useState<boolean>(false);
   const [viewMode, setViewMode] = useState<"list" | "chart">("list");
+  const [isLoadingPlan, setIsLoadingPlan] = useState<boolean>(false);
+  const [reviewPlan, setReviewPlan] = useState<string | null>(null);
+  const [suggestedReviewTopics, setSuggestedReviewTopics] = useState<{topic: string, priority: string, reason?: string}[]>([]);
   
-  // Format data for display
-  const progressData = getProgress || [];
-  
-  // Prepare chart data
-  const chartData = progressData.map(item => ({
-    name: item.topic,
-    confidence: item.confidence,
-    lastReviewed: new Date(item.lastReviewed).getTime(),
-  }));
-  
+  const progressQuery = useQuery(api.progress.getAll, { userId });
+  // const suggestReviewAction = useAction(api.ai.suggestReviewContent); // This action does not exist in user's convex/ai.ts
+
+  useEffect(() => {
+    if (darkMode) document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
+  }, [darkMode]);
+
+  const progressData: ProgressItem[] = progressQuery 
+    ? [...progressQuery].sort((a,b) => b.lastReviewed - a.lastReviewed) 
+    : [];
+
   const handleGenerateReviewPlan = async () => {
-    setIsGeneratingPlan(true);
-    setError(null);
-    
+    setIsLoadingPlan(true);
+    setReviewPlan(null);
+    setSuggestedReviewTopics([]);
     try {
-      // Mock suggestReviewContent function since it's missing from the API
-      // In a real app, you would call the actual AI action
-      // const result = await suggestReview({ userId });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Mock response
-      const result = {
-        reviewPlan: "Based on your current progress, I recommend focusing on Cardiology and Respiratory topics this week. These subjects show the lowest confidence scores and haven't been reviewed recently. Plan 30-minute daily sessions alternating between these topics, using active recall and spaced repetition techniques.",
-        suggestedTopics: [
-          { topic: "Cardiac Pharmacology", priority: "high" },
-          { topic: "Respiratory Pathophysiology", priority: "medium" },
-          { topic: "Renal Physiology", priority: "low" }
-        ]
-      };
-      
-      setReviewPlan(result.reviewPlan);
-      setSuggestedTopics(result.suggestedTopics);
-      
-      toast.success("Review plan generated successfully!");
-    } catch (error: unknown) {
-      console.error("Error generating review plan:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      setError(`Failed to generate review plan: ${errorMessage}`);
-      toast.error(`Failed to generate review plan: ${errorMessage}`);
+        // TODO: User needs to implement `api.ai.suggestReviewContent` or a similar action in convex/ai.ts
+        // For now, using mock data as `api.ai.suggestReviewContent` is not found.
+        toast.info("Generating smart review plan (using mock data for now). Implement AI action for real suggestions.");
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        const mockResult = {
+            reviewPlan: "Based on your current progress (mock data), focus on Cardiology and high-yield Pharmacology topics this week. Revisit topics with confidence below 60% or those not reviewed in the last 2 weeks. Allocate 30-minute focused sessions.",
+            suggestedTopics: [
+                { topic: "Cardiac Arrhythmias (Mock)", priority: "High", reason: "Low confidence (45%)" },
+                { topic: "Beta Blockers MOA (Mock)", priority: "Medium", reason: "Not reviewed in 15 days" },
+                { topic: "Renal Physiology Basics (Mock)", priority: "Low", reason: "Good confidence (80%) but core topic" },
+            ]
+        };
+        setReviewPlan(mockResult.reviewPlan);
+        setSuggestedReviewTopics(mockResult.suggestedTopics);
+        toast.success("Smart Review Plan generated (mock data)!");
+    } catch (error) {
+        toast.error("Failed to generate review plan.");
+        console.error("Error generating review plan:", error);
     } finally {
-      setIsGeneratingPlan(false);
+        setIsLoadingPlan(false);
     }
   };
 
-  // Get today's date for formatting
-  const today = new Date();
-  
-  // Define priority colors
-  const getPriorityColors = (priority: string) => {
-    switch(priority) {
-      case 'high':
-        return {
-          bg: 'bg-red-100',
-          text: 'text-red-800',
-          dot: 'bg-red-500',
-          border: 'border-red-200'
-        };
-      case 'medium':
-        return {
-          bg: 'bg-amber-100',
-          text: 'text-amber-800',
-          dot: 'bg-amber-500',
-          border: 'border-amber-200'
-        };
-      case 'low':
-        return {
-          bg: 'bg-green-100',
-          text: 'text-green-800',
-          dot: 'bg-green-500',
-          border: 'border-green-200'
-        };
-      default:
-        return {
-          bg: 'bg-gray-100',
-          text: 'text-gray-800',
-          dot: 'bg-gray-500',
-          border: 'border-gray-200'
-        };
-    }
+  const getConfidenceColor = (confidence: number) => {
+    if (confidence >= 75) return darkMode ? 'text-green-400' : 'text-green-600';
+    if (confidence >= 50) return darkMode ? 'text-yellow-400' : 'text-yellow-500';
+    return darkMode ? 'text-red-400' : 'text-red-500';
   };
+   const getProgressBgColor = (confidence: number) => {
+    if (confidence >= 75) return darkMode ? 'bg-green-500/20' : 'bg-green-100';
+    if (confidence >= 50) return darkMode ? 'bg-yellow-500/20' : 'bg-yellow-100';
+    return darkMode ? 'bg-red-500/20' : 'bg-red-100';
+  };
+
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 fade-in">
-      <Card className="card-premium overflow-hidden">
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center mb-1">
-              <div className="p-1.5 mr-3 rounded-lg bg-blue-50">
-                <Activity className="h-5 w-5 text-blue-500" />
-              </div>
-              <CardTitle className="text-2xl">Learning Progress</CardTitle>
+    <div className={`space-y-8 ${darkMode ? 'text-neutral-200' : ''}`}>
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="flex items-center">
+                <div className={`p-2.5 mr-3 rounded-xl shadow-md ${darkMode ? 'bg-green-500' : 'bg-green-600'}`}>
+                    <Activity className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                    <h1 className={`text-3xl font-bold tracking-tight ${darkMode ? 'text-neutral-100' : 'text-gray-900'}`}>Learning Progress</h1>
+                    <p className={`text-sm ${darkMode ? 'text-neutral-400' : 'text-gray-500'}`}>Track your mastery across medical topics.</p>
+                </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Button
-                variant={viewMode === "list" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setViewMode("list")}
-                className="h-8"
-              >
-                <ListOrdered className="h-4 w-4 mr-1" />
-                List
-              </Button>
-              <Button
-                variant={viewMode === "chart" ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setViewMode("chart")}
-                className="h-8"
-              >
-                <BarChart className="h-4 w-4 mr-1" />
-                Chart
-              </Button>
+            <div className="flex items-center gap-2">
+                <div className={`p-0.5 rounded-lg flex ${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-gray-200 border-gray-300'} border`}>
+                    <Button variant={viewMode === 'list' ? 'default' : 'ghost'} size="icon" onClick={() => setViewMode('list')} className={`rounded-md h-8 w-8 ${viewMode === 'list' && (darkMode ? 'bg-green-600 text-white' : 'bg-green-500 text-white') }`} title="List View"><ListChecks className="h-4 w-4"/></Button>
+                    <Button variant={viewMode === 'chart' ? 'default' : 'ghost'} size="icon" onClick={() => setViewMode('chart')} className={`rounded-md h-8 w-8 ${viewMode === 'chart' && (darkMode ? 'bg-green-600 text-white' : 'bg-green-500 text-white') }`} title="Chart View"><BarChart className="h-4 w-4"/></Button>
+                </div>
+                <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setDarkMode(!darkMode)}
+                    className={`rounded-full ${darkMode ? 'bg-neutral-800 border-neutral-700 hover:bg-neutral-700' : 'bg-white border-gray-200 hover:bg-gray-100'}`}
+                    title="Toggle Theme"
+                >
+                    {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                </Button>
             </div>
-          </div>
-          <CardDescription className="text-gray-600">
-            Track your confidence and review status across different medical topics
-          </CardDescription>
+        </div>
+
+      <Card className={`shadow-xl overflow-hidden ${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'}`}>
+        <CardHeader className={`border-b ${darkMode ? 'border-neutral-700 bg-neutral-800/50' : 'border-gray-100 bg-gray-50/50'}`}>
+            <div className="flex items-center gap-3">
+                <Sparkles className={`h-5 w-5 ${darkMode ? 'text-green-400' : 'text-green-600'}`} />
+                <CardTitle className={`text-lg font-semibold ${darkMode ? 'text-neutral-100' : 'text-gray-800'}`}>Smart Review Suggestions</CardTitle>
+            </div>
+             <CardDescription className={`text-sm mt-1 ${darkMode ? 'text-neutral-400' : 'text-gray-500'}`}>
+                Let AI analyze your progress and suggest a focused review plan. (Backend AI action needed for full functionality)
+            </CardDescription>
         </CardHeader>
-        <CardContent className="pt-6">
-          {progressData.length === 0 ? (
-            <div className="text-center py-16 px-6">
-              <div className="bg-gray-50 h-20 w-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Activity className="h-10 w-10 text-gray-400" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-800 mb-2">No progress data yet</h3>
-              <p className="text-gray-500 max-w-md mx-auto">
-                As you use flashcards and quizzes, your progress will be tracked here.
-                Start by reviewing some flashcards or taking a quiz.
-              </p>
-              <div className="mt-6 flex justify-center space-x-4">
-                <Button
-                  variant="outline"
-                  className="hover-lift"
-                  onClick={() => toast.info("Navigate to the Flashcards tab to start reviewing")}
-                >
-                  <BookOpen className="h-4 w-4 mr-2" />
-                  Review Flashcards
-                </Button>
-                <Button
-                  variant="outline"
-                  className="hover-lift"
-                  onClick={() => toast.info("Navigate to the Quizzes tab to test your knowledge")}
-                >
-                  <Book className="h-4 w-4 mr-2" />
-                  Take a Quiz
-                </Button>
-              </div>
-            </div>
-          ) : viewMode === "list" ? (
-            <div className="space-y-6">
-              {progressData.map((item, index) => (
-                <div key={index} className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow hover-lift">
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-                    <div>
-                      <h3 className="font-medium text-lg text-gray-900">{item.topic}</h3>
-                      <div className="flex items-center mt-1 text-sm text-gray-500">
-                        <Clock className="h-4 w-4 mr-1" />
-                        <span>
-                          Last reviewed: {
-                            new Date(item.lastReviewed).toLocaleDateString(undefined, {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric'
-                            })
-                          }
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center bg-gray-50 px-3 py-1 rounded-full">
-                      <span className={`font-semibold ${
-                        item.confidence >= 70 ? 'text-green-600' : 
-                        item.confidence >= 40 ? 'text-amber-600' : 
-                        'text-red-600'
-                      }`}>
-                        {item.confidence}%
-                      </span>
-                      <span className="text-gray-400 text-sm ml-1">confidence</span>
-                    </div>
-                  </div>
-                  <div className="mt-4">
-                    <Progress 
-                      value={item.confidence} 
-                      className={
-                        item.confidence >= 70 ? 'bg-green-100' : 
-                        item.confidence >= 40 ? 'bg-amber-100' : 
-                        'bg-red-100'
-                      }
-                      size="default"
-                    />
-                  </div>
-                  <div className="flex flex-wrap gap-2 mt-4 justify-end">
-                    <Button variant="outline" size="sm" className="hover-lift">
-                      <BookOpen className="h-4 w-4 mr-1" />
-                      Review
-                    </Button>
-                    <Button variant="outline" size="sm" className="hover-lift">
-                      <Book className="h-4 w-4 mr-1" />
-                      Generate Quiz
-                    </Button>
-                  </div>
+        <CardContent className="p-5 sm:p-6 space-y-4">
+            {isLoadingPlan ? (
+                <div className="flex items-center justify-center p-6">
+                    <Loader2 className="h-6 w-6 animate-spin mr-3"/> Generating your personalized plan...
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="h-96 w-full bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
-              {/* This is a placeholder for the chart view - in a real app, you would render a proper chart here */}
-              <div className="h-full flex items-center justify-center">
-                <div className="text-center">
-                  <BarChart className="h-16 w-16 text-blue-500 mx-auto mb-4" />
-                  <p className="text-gray-500">Chart visualization would be rendered here</p>
-                  <p className="text-sm text-gray-400 mt-2">Using a library like Recharts or Chart.js</p>
+            ) : reviewPlan ? (
+                <motion.div initial={{opacity:0}} animate={{opacity:1}} className="space-y-4">
+                    <div className={`p-4 rounded-lg ${darkMode ? 'bg-neutral-700/50' : 'bg-green-50'}`}>
+                        <h4 className={`font-semibold mb-1 ${darkMode ? 'text-green-300' : 'text-green-700'}`}>AI Review Plan:</h4>
+                        <p className={`text-sm ${darkMode ? 'text-neutral-300' : 'text-gray-700'}`}>{reviewPlan}</p>
+                    </div>
+                    {suggestedReviewTopics.length > 0 && (
+                        <div>
+                            <h4 className={`font-medium mb-2 ${darkMode ? 'text-neutral-200' : 'text-gray-700'}`}>Key Topics to Review:</h4>
+                            <div className="space-y-2">
+                                {suggestedReviewTopics.map(item => (
+                                    <div key={item.topic} className={`p-3 rounded-md border flex justify-between items-center ${darkMode ? `bg-neutral-700 border-neutral-600 ${item.priority === 'High' ? 'border-l-red-500' : item.priority === 'Medium' ? 'border-l-yellow-500' : 'border-l-green-500'}` 
+                                                                                                                                    : `bg-white border-gray-200 ${item.priority === 'High' ? 'border-l-red-400' : item.priority === 'Medium' ? 'border-l-yellow-400' : 'border-l-green-400'}` } border-l-4`}>
+                                        <div>
+                                            <span className={`font-medium text-sm ${darkMode ? 'text-neutral-100':'text-gray-800'}`}>{item.topic}</span>
+                                            {item.reason && <p className={`text-xs ${darkMode ? 'text-neutral-400':'text-gray-500'}`}>{item.reason}</p>}
+                                        </div>
+                                        <Badge variant={item.priority === 'High' ? 'destructive' : item.priority === 'Medium' ? 'default' : 'outline'} className={`text-xs rounded-full ${item.priority === 'Medium' && (darkMode ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' : 'bg-yellow-100 text-yellow-700 border-yellow-200') }`}>
+                                            {item.priority}
+                                        </Badge>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                     <Button onClick={() => {setReviewPlan(null); setSuggestedReviewTopics([])}} variant="outline" className={`w-full mt-3 ${darkMode ? 'border-neutral-600 hover:bg-neutral-700':'border-gray-300 hover:bg-gray-100'}`}>
+                        <RotateCcw className="h-4 w-4 mr-2"/> Clear Plan & Regenerate
+                    </Button>
+                </motion.div>
+            ) : (
+                 <div className="text-center py-6">
+                    <Info className={`h-8 w-8 mx-auto mb-2 ${darkMode ? 'text-neutral-500' : 'text-gray-400'}`} />
+                    <p className={`text-sm ${darkMode ? 'text-neutral-400' : 'text-gray-500'}`}>No review plan generated yet. Click below to get started.</p>
                 </div>
-              </div>
-            </div>
-          )}
+            )}
+            {!reviewPlan && !isLoadingPlan && (
+                <Button onClick={handleGenerateReviewPlan} className={`w-full rounded-lg shadow-md ${darkMode ? 'bg-green-600 hover:bg-green-500' : 'bg-green-600 hover:bg-green-700'}`}>
+                    <Sparkles className="h-4 w-4 mr-2"/> Generate Smart Review Plan
+                </Button>
+            )}
         </CardContent>
       </Card>
 
-      <Card className="card-premium">
-        <CardHeader className="pb-2">
-          <div className="flex items-center mb-1">
-            <div className="p-1.5 mr-3 rounded-lg bg-blue-50">
-              <Sparkles className="h-5 w-5 text-blue-500" />
-            </div>
-            <CardTitle className="text-2xl">Smart Review Mode</CardTitle>
-          </div>
-          <CardDescription className="text-gray-600">
-            Optimize your learning with AI-powered spaced repetition
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6 pt-6">
-          {!reviewPlan ? (
-            <div className="text-center py-8 space-y-4">
-              <div className="relative">
-                <div className="h-20 w-20 bg-gradient-premium rounded-full mx-auto flex items-center justify-center">
-                  <Brain className="h-10 w-10 text-white" />
-                </div>
-                <div className="absolute -top-1 -right-1 h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <Sparkles className="h-5 w-5 text-blue-600" />
-                </div>
-              </div>
-              <div>
-                <h3 className="text-xl font-medium text-gray-900 mb-2">Ready for Smart Review?</h3>
-                <p className="text-gray-600 max-w-md mx-auto">
-                  Our AI will analyze your progress and create a personalized review plan
-                  based on confidence levels and time since last review.
+      <div className="space-y-4">
+        <h2 className={`text-2xl font-semibold border-b pb-2 mb-4 ${darkMode ? 'text-neutral-100 border-neutral-700' : 'text-gray-800 border-gray-200'}`}>Topic Mastery</h2>
+        {!progressQuery && <div className="p-6 text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto"/> <p className="mt-2 text-sm">Loading progress data...</p></div>}
+        {progressQuery && progressData.length === 0 && (
+            <div className={`text-center py-10 rounded-xl ${darkMode ? 'bg-neutral-800 border border-neutral-700' : 'bg-white border border-gray-200 shadow-sm'}`}>
+                <TrendingUp className={`h-12 w-12 mx-auto mb-3 ${darkMode ? 'text-neutral-500' : 'text-gray-400'}`} />
+                <h3 className={`text-lg font-medium ${darkMode ? 'text-neutral-200' : 'text-gray-700'}`}>No Progress Tracked Yet</h3>
+                <p className={`mt-1 text-sm ${darkMode ? 'text-neutral-400' : 'text-gray-500'}`}>
+                    Review flashcards and take quizzes to see your progress here.
                 </p>
-              </div>
-              
-              {error && (
-                <div className="alert-premium error max-w-md mx-auto">
-                  <AlertCircle className="h-5 w-5 mr-2 text-red-600" />
-                  <p className="text-sm">{error}</p>
-                </div>
-              )}
-              
-              <Button 
-                onClick={handleGenerateReviewPlan}
-                disabled={isGeneratingPlan}
-                className="bg-gradient-premium hover-lift mt-4"
-              >
-                {!isGeneratingPlan && <Sparkles className="h-4 w-4 mr-2" />}
-                Generate Smart Review Plan
-              </Button>
             </div>
-          ) : (
-            <div className="space-y-6">
-              <div className="p-6 bg-gradient-secondary rounded-xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 opacity-10">
-                  <Brain className="h-full w-full text-blue-600" />
+        )}
+
+        {progressQuery && progressData.length > 0 && viewMode === 'list' && (
+            <div className="space-y-3">
+            {progressData.map((item) => (
+              <Card key={item._id?.toString()} className={`p-4 rounded-lg shadow-md group transition-all duration-150 ${darkMode ? 'bg-neutral-800 border-neutral-700 hover:border-neutral-600' : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-lg'}`}>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <div className="flex-1">
+                        <h4 className={`font-medium ${darkMode ? 'text-neutral-100' : 'text-gray-800'}`}>{item.topic}</h4>
+                        <p className={`text-xs ${darkMode ? 'text-neutral-500' : 'text-gray-500'}`}>Last reviewed: {formatDate(item.lastReviewed)}</p>
+                    </div>
+                    <div className="w-full sm:w-auto flex items-center gap-3 mt-2 sm:mt-0">
+                        <Progress value={item.confidence} className={`h-2.5 flex-grow ${getProgressBgColor(item.confidence)}`} />
+                        <span className={`font-semibold text-sm w-12 text-right ${getConfidenceColor(item.confidence)}`}>{item.confidence}%</span>
+                    </div>
                 </div>
-                <div className="relative">
-                  <div className="flex items-start space-x-4">
-                    <div className="p-2 rounded-full bg-blue-100">
-                      <Sparkles className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">Your Personalized Review Plan</h3>
-                      <div className="prose prose-blue max-w-none text-gray-700">
-                        {reviewPlan.split('\n\n').map((paragraph, index) => (
-                          <p key={index}>{paragraph}</p>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-6 pt-6 border-t border-gray-200">
-                    <div className="flex items-center mb-4">
-                      <Calendar className="h-5 w-5 mr-2 text-blue-600" />
-                      <h4 className="font-medium text-gray-900">Today's Review Schedule</h4>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
-                        <div className="flex items-center mb-2">
-                          <Clock className="h-4 w-4 mr-2 text-blue-500" />
-                          <span className="text-sm font-medium">Morning Session</span>
-                        </div>
-                        <p className="text-gray-700">Cardiac Pharmacology (30 min)</p>
-                      </div>
-                      <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
-                        <div className="flex items-center mb-2">
-                          <Clock className="h-4 w-4 mr-2 text-blue-500" />
-                          <span className="text-sm font-medium">Evening Session</span>
-                        </div>
-                        <p className="text-gray-700">Respiratory Pathophysiology (30 min)</p>
-                      </div>
-                    </div>
-                  </div>
+                 <div className="mt-3 pt-3 border-t flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button size="sm" variant="outline" className={`rounded-md text-xs ${darkMode ? 'border-neutral-600 hover:bg-neutral-700' : 'border-gray-300 hover:bg-gray-50'}`} onClick={() => toast.info(`Reviewing ${item.topic}...`)}>
+                        <BookOpen className="h-3.5 w-3.5 mr-1.5"/> Review Topic
+                    </Button>
+                     <Button size="sm" variant="outline" className={`rounded-md text-xs ${darkMode ? 'border-neutral-600 hover:bg-neutral-700' : 'border-gray-300 hover:bg-gray-50'}`} onClick={() => toast.info(`Quiz for ${item.topic}...`)}>
+                        <Zap className="h-3.5 w-3.5 mr-1.5"/> Take Quiz
+                    </Button>
                 </div>
-              </div>
-              
-              {suggestedTopics.length > 0 && (
-                <div className="space-y-4">
-                  <h4 className="font-medium text-lg text-gray-900">Suggested Topics to Review</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {suggestedTopics.map((topic, index) => {
-                      const colors = getPriorityColors(topic.priority);
-                      return (
-                        <div 
-                          key={index} 
-                          className={`rounded-xl ${colors.bg} ${colors.text} p-5 border ${colors.border} hover-lift`}
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-center space-x-3">
-                              <div className={`w-3 h-3 rounded-full ${colors.dot}`}></div>
-                              <h5 className="font-medium">{topic.topic}</h5>
-                            </div>
-                            <span className="uppercase text-xs px-2 py-0.5 rounded-full bg-white bg-opacity-50">
-                              {topic.priority}
-                            </span>
-                          </div>
-                          <div className="mt-4 flex">
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              className="w-full bg-white hover-lift"
-                            >
-                              <BookOpen className="h-4 w-4 mr-1" />
-                              Review
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+              </Card>
+            ))}
+          </div>
+        )}
+        {progressQuery && progressData.length > 0 && viewMode === 'chart' && (
+             <div className={`p-6 rounded-xl shadow-lg h-96 flex items-center justify-center text-center ${darkMode ? 'bg-neutral-800 border-neutral-700' : 'bg-white border-gray-200'}`}>
+                <div>
+                    <BarChart className={`h-16 w-16 mx-auto mb-4 ${darkMode ? 'text-green-400' : 'text-green-500'}`} />
+                    <p className={`font-medium ${darkMode ? 'text-neutral-300' : 'text-gray-600'}`}>Progress Chart View</p>
+                    <p className={`text-sm ${darkMode ? 'text-neutral-500' : 'text-gray-400'}`}>A visual representation of your topic mastery would appear here.</p>
+                    <p className={`text-xs mt-1 ${darkMode ? 'text-neutral-600' : 'text-gray-400'}`}>(Chart library like Recharts or Chart.js needed for actual implementation)</p>
                 </div>
-              )}
-              
-              <div className="flex justify-end">
-                <Button 
-                  variant="outline"
-                  className="hover-lift"
-                  onClick={() => {
-                    setReviewPlan("");
-                    setSuggestedTopics([]);
-                  }}
-                >
-                  <RotateCcw className="h-4 w-4 mr-2" />
-                  Reset Plan
-                </Button>
-              </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+        )}
+      </div>
     </div>
   );
 }

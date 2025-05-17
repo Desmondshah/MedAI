@@ -229,6 +229,201 @@ async function getMedicalLiterature(question: string): Promise<{context: string,
   return { context, citations };
 }
 
+// Interface for the expected structure of a quiz question from AI
+interface QuizQuestionFromAI {
+  question: string;
+  options: string[];
+  correctAnswerIndex: number; // e.g., 0 for first option
+  explanation?: string;
+}
+
+// Interface for the overall quiz structure returned by AI
+interface QuizDataFromAI {
+  title: string;
+  questions: QuizQuestionFromAI[];
+  difficulty?: string; // AI might also determine/confirm difficulty
+}
+
+export const generateQuizQuestions = action({
+  args: {
+    topic: v.string(),
+    difficulty: v.string(), // "easy", "medium", "hard"
+    questionCount: v.number(),
+  },
+  handler: async (ctx, args): Promise<QuizDataFromAI | null> => {
+    try {
+      const openai = getOpenAIClient(); // Your existing helper
+      const modelConfig = getModelConfig("qa", args.difficulty as ModelComplexity || "medium"); // Use your model router
+
+      const systemPrompt = `You are an AI assistant specialized in creating medical education quizzes.
+      Generate a quiz with ${args.questionCount} questions about the topic "${args.topic}" at ${args.difficulty} difficulty.
+      Each question should have multiple choice options (typically 4). Indicate the correct answer by its index (0-indexed).
+      Optionally, provide a brief explanation for the correct answer.
+      Return the response as a single JSON object with the following structure:
+      {
+        "title": "Quiz Title Related to Topic",
+        "difficulty": "${args.difficulty}", // Echo back or confirm difficulty
+        "questions": [
+          {
+            "question": "Question text...",
+            "options": ["Option A", "Option B", "Option C", "Option D"],
+            "correctAnswerIndex": 0, // Index of the correct option in the "options" array
+            "explanation": "Brief explanation for the correct answer (optional)..."
+          }
+          // ... more questions
+        ]
+      }
+      Ensure the output is ONLY the JSON object and nothing else.
+      Example for correctAnswerIndex: if "Option C" is correct and options are ["A", "B", "C", "D"], correctAnswerIndex would be 2.`;
+
+      const userPrompt = `Generate ${args.questionCount} quiz questions on "${args.topic}" (${args.difficulty}). Format as JSON.`;
+
+      console.log(`Generating quiz for: ${args.topic}, Difficulty: ${args.difficulty}, Count: ${args.questionCount}`);
+      
+      const response = await openai.chat.completions.create({
+        model: modelConfig.model,
+        temperature: modelConfig.temperature, // Adjust as needed for quiz generation
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        response_format: { type: "json_object" }, // Request JSON output if model supports
+      });
+
+      const resultText = response.choices[0].message.content;
+      if (!resultText) {
+        console.error("OpenAI returned empty content for quiz generation.");
+        return null;
+      }
+
+      try {
+        const quizData = JSON.parse(resultText) as QuizDataFromAI;
+        // Basic validation
+        if (quizData && Array.isArray(quizData.questions) && quizData.questions.length > 0) {
+          // Map correctAnswerIndex to correctAnswer for frontend if needed, or adjust frontend
+          // For now, assume frontend will handle correctAnswerIndex
+          return quizData;
+        } else {
+          console.error("Parsed quiz data is not in the expected format:", quizData);
+          return null;
+        }
+      } catch (parseError) {
+        console.error("Error parsing JSON response from OpenAI for quiz:", parseError, "\nRaw response:", resultText);
+        // Try to find JSON within backticks if any
+        const jsonMatch = resultText.match(/```json\n([\s\S]*?)\n```/);
+        if (jsonMatch && jsonMatch[1]) {
+            try {
+                const quizData = JSON.parse(jsonMatch[1]) as QuizDataFromAI;
+                 if (quizData && Array.isArray(quizData.questions) && quizData.questions.length > 0) {
+                    return quizData;
+                 }
+            } catch (e) {
+                console.error("Still failed to parse extracted JSON:", e);
+            }
+        }
+        return null;
+      }
+    } catch (error) {
+      console.error("Error in generateQuizQuestions action:", error);
+      throw new Error("Failed to generate quiz questions: " + String(error));
+    }
+  },
+});
+
+interface StudySuggestion {
+    topic: string;
+    priority: "High" | "Medium" | "Low"; // Use specific literals
+    reason?: string;
+}
+
+interface ReviewPlanResponse {
+    reviewPlan: string; // Text summary of the plan
+    suggestedTopics: StudySuggestion[];
+}
+
+export const suggestReviewContent = action({
+  args: { 
+    // userId: v.id("users"), // If you need user-specific data from DB
+    progressData: v.array(
+      v.object({
+        topic: v.string(),
+        confidence: v.number(),
+        lastReviewed: v.number(), // Timestamp
+      })
+    ),
+    // You can add more inputs like upcoming exams, goals, etc.
+  },
+  handler: async (ctx, args): Promise<ReviewPlanResponse | null> => {
+    try {
+      const openai = getOpenAIClient();
+      // Determine complexity based on amount of progress data, etc.
+      const complexity = args.progressData.length > 10 ? "medium" : "simple";
+      const modelConfig = getModelConfig("studyPlan", complexity); // studyPlan or a new task type
+
+      const formattedProgress = args.progressData.map(p => ({
+          ...p,
+          lastReviewedDate: new Date(p.lastReviewed).toLocaleDateString()
+      }));
+
+      const systemPrompt = `You are an AI assistant helping a medical student create a smart review plan.
+      Analyze the provided progress data (topic, confidence percentage, lastReviewedDate).
+      Provide a general review strategy (as 'reviewPlan' text).
+      Then, list specific topics to review ('suggestedTopics') with a 'priority' (High, Medium, Low) and a 'reason'.
+      Prioritize topics with low confidence or those not reviewed recently.
+      Return the response as a single JSON object:
+      {
+        "reviewPlan": "Overall strategy text...",
+        "suggestedTopics": [
+          { "topic": "Topic Name", "priority": "High", "reason": "Confidence is low (e.g., 30%) and not reviewed in X days." }
+        ]
+      }
+      Ensure the output is ONLY the JSON object.`;
+      
+      const userPrompt = `My current progress on medical topics is: ${JSON.stringify(formattedProgress)}. Please generate a smart review plan.`;
+
+      const response = await openai.chat.completions.create({
+        model: modelConfig.model,
+        temperature: 0.5,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        response_format: { type: "json_object" },
+      });
+
+      const resultText = response.choices[0].message.content;
+      if (!resultText) {
+          console.error("OpenAI returned empty content for review plan.");
+          return null;
+      }
+      try {
+        const planData = JSON.parse(resultText) as ReviewPlanResponse;
+        if (planData && planData.reviewPlan && Array.isArray(planData.suggestedTopics)) {
+            return planData;
+        } else {
+            console.error("Parsed review plan is not in expected format:", planData);
+            return null;
+        }
+      } catch (parseError) {
+        console.error("Error parsing JSON for review plan:", parseError, "\nRaw:", resultText);
+         const jsonMatch = resultText.match(/```json\n([\s\S]*?)\n```/);
+        if (jsonMatch && jsonMatch[1]) {
+            try {
+                const planData = JSON.parse(jsonMatch[1]) as ReviewPlanResponse;
+                 if (planData && planData.reviewPlan && Array.isArray(planData.suggestedTopics)) {
+                    return planData;
+                 }
+            } catch (e) { /* ignore */ }
+        }
+        return null;
+      }
+    } catch (error) {
+      console.error("Error in suggestReviewContent action:", error);
+      throw new Error("Failed to suggest review content: " + String(error));
+    }
+  },
+});
+
 // Main enhanced functions
 
 export const askQuestion = action({

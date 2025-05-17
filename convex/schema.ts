@@ -29,18 +29,20 @@ const applicationTables = {
   }).index("by_user", ["userId"]),
 
   quizzes: defineTable({
-    userId: v.id("users"),
-    title: v.string(),
-    questions: v.array(
-      v.object({
-        question: v.string(),
-        options: v.array(v.string()),
-        correctAnswer: v.number(),
-      })
-    ),
-    score: v.optional(v.number()),
-    takenAt: v.optional(v.number()),
-  }).index("by_user", ["userId"]),
+  userId: v.id("users"),
+  title: v.string(),
+  questions: v.array(
+    v.object({
+      question: v.string(),
+      options: v.array(v.string()),
+      correctAnswer: v.number(),
+      explanation: v.optional(v.string()), // <<-- ADD THIS LINE
+    })
+  ),
+  score: v.optional(v.number()),
+  takenAt: v.optional(v.number()),
+  difficulty: v.optional(v.string()), 
+}).index("by_user", ["userId"]),
 
   bookmarks: defineTable({
     userId: v.id("users"),
