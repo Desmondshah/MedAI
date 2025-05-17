@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Kalam:wght@300;400;700&family=Patrick+Hand&family=Architects+Daughter&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 :root {
@@ -891,4 +891,2409 @@ body {
   .tabs-container[data-variant="minimal"] button span:first-child {
     margin-right: 0;
   }
+}
+
+
+
+
+
+/* === Paper Notebook Theme for AskTab === */
+
+.notebook-theme {
+  background-color: #FAF0E6; /* Linen - overall page background for the tab */
+  font-family: 'Patrick Hand', cursive;
+  color: #3D2B1F; /* Dark coffee brown for text */
+  height: 100%; /* Ensure it fills the tab content area */
+  display: flex;
+  flex-direction: column;
+}
+
+.notebook-theme .asktab-header {
+  background-color: rgba(253, 245, 230, 0.85); /* Lighter linen with transparency */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid #E0D8CD; /* Softer border */
+  padding: 0.75rem 1.5rem; /* Adjust padding as needed */
+}
+
+.notebook-theme .asktab-header h1 {
+  font-family: 'Caveat', cursive;
+  color: #4A3B31; /* Darker coffee brown for header text */
+  font-size: 1.75rem; /* Slightly larger header font */
+}
+.notebook-theme .asktab-header .badge-ai {
+  background-color: #FFF9C4; /* Light yellow */
+  color: #795548; /* Brown text */
+  border: 1px solid #FFF59D;
+  font-family: 'Architects Daughter', cursive;
+}
+
+.notebook-theme .asktab-sidebar {
+  background-color: #FFFBF0; /* Very light cream, like notebook cover inside */
+  border-right: 1px solid #E0D8CD; /* Softer border */
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.notebook-theme .asktab-sidebar-button {
+  color: #5C5C5C; /* Medium gray-brown */
+  font-family: 'Architects Daughter', cursive;
+  border-radius: 6px;
+  transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+  padding: 0.6rem 0.75rem;
+  margin: 0.25rem 0.5rem; /* Add some margin around buttons */
+  text-align: left;
+}
+
+.notebook-theme .asktab-sidebar-button:hover {
+  background-color: #F0E6D8; /* Light hover, like a coffee stain */
+  color: #333;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.05);
+}
+
+.notebook-theme .asktab-sidebar-button.active {
+  background-color: #E0D8CD; /* More prominent selection */
+  color: #2A2A2A;
+  font-weight: bold; /* Use bold instead of black for better readability */
+  box-shadow: inset 1px 1px 4px rgba(0,0,0,0.08);
+}
+.notebook-theme .asktab-sidebar-button svg {
+  margin-right: 0.75rem; /* Increased icon margin */
+}
+
+.notebook-theme .asktab-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Important for chat scrolling */
+}
+
+.notebook-theme .chat-section-container {
+  flex: 1;
+  background-color: #fff; /* White paper for the chat page */
+  border-left: 4px solid #FF6347; /* Brighter red margin line */
+  box-shadow: 0px 2px 10px rgba(0,0,0,0.08);
+  border-radius: 0 4px 4px 0; /* Only round outer corners */
+  padding: 1em; /* Padding for the content */
+  background-image:
+    linear-gradient(to bottom, transparent 0.74em, #EAE0D6 0.74em, #EAE0D6 0.79em, transparent 0.79em); /* Thinner, lighter lines */
+  background-size: 100% 1.5em; /* Line height */
+  line-height: 1.5em;
+  overflow-y: auto; /* Ensure this scrolls */
+  color: #333; /* Default text color on lines */
+}
+
+.notebook-theme .chat-message {
+  margin-bottom: 1em; /* Space between messages */
+  position: relative;
+  max-width: 80%; /* Messages don't take full width */
+}
+.notebook-theme .chat-message .message-content-wrapper {
+  padding: 10px 15px;
+  border-radius: 12px;
+  box-shadow: 1px 2px 4px rgba(0,0,0,0.07);
+  font-family: 'Kalam', cursive;
+  font-size: 0.95rem;
+  border: 1px solid transparent; /* Base border */
+  position: relative;
+}
+
+.notebook-theme .chat-message-user .message-content-wrapper {
+  background-color: #D4E8FC; /* Light sky blue - like blue ink on paper */
+  color: #1E3A8A; /* Dark blue text */
+  border-color: #A9D3F5;
+  border-radius: 12px 12px 4px 12px; /* Chat bubble shape */
+  margin-left: auto; /* Align to right */
+}
+
+.notebook-theme .chat-message-assistant .message-content-wrapper {
+  background-color: #FEF9C3; /* Pale yellow - like a legal pad or sticky */
+  color: #725B00; /* Dark yellow/brown text */
+  border-color: #FDE68A;
+  border-radius: 12px 12px 12px 4px; /* Chat bubble shape */
+  margin-right: auto; /* Align to left */
+}
+
+/* Adding "tape" corners (optional, can be adjusted or removed) */
+.notebook-theme .chat-message-user .message-content-wrapper::before,
+.notebook-theme .chat-message-assistant .message-content-wrapper::before {
+  content: '';
+  position: absolute;
+  width: 15px;
+  height: 25px;
+  background-color: rgba(255, 224, 130, 0.5); /* Semi-transparent tape color */
+  transform: rotate(-45deg);
+  opacity: 0.7;
+  border: 1px dashed rgba(204, 165, 80, 0.5);
+}
+.notebook-theme .chat-message-user .message-content-wrapper::before {
+  top: -8px; right: -8px;
+}
+.notebook-theme .chat-message-assistant .message-content-wrapper::before {
+  top: -8px; left: -8px;
+}
+
+
+.notebook-theme .chat-message-system {
+  font-style: italic;
+  color: #8D6E63; /* Muted brown for system messages */
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 8px 0;
+  width: 100%;
+}
+.notebook-theme .chat-message-system svg { /* For system icons */
+  display: inline-block;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+.notebook-theme .chat-input-area {
+  background-color: #FAF0E6;
+  border-top: 2px dashed #D3C9BC;
+  padding: 1rem;
+}
+
+.notebook-theme .chat-input-textarea {
+  background-color: #FFFBF0;
+  border: 1px solid #E0D8CD;
+  border-radius: 8px;
+  color: #4A3B31;
+  font-family: 'Kalam', cursive;
+  padding: 0.75rem;
+  box-shadow: inset 1px 1px 3px rgba(0,0,0,0.06);
+  line-height: 1.6;
+}
+.notebook-theme .chat-input-textarea::placeholder {
+  color: #A89F94;
+}
+
+.notebook-theme .chat-button {
+  border-radius: 8px; /* Squarish buttons */
+  background-color: #81C784; /* Soft Green */
+  color: white;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+  transition: background-color 0.2s, transform 0.2s;
+  border: 1px solid #66BB6A;
+  padding: 0.75rem !important; /* Ensure consistent padding */
+}
+.notebook-theme .chat-button.send-button { /* Specific for send */
+    background-color: #4CAF50; /* Brighter Green for Send */
+    border-color: #388E3C;
+}
+.notebook-theme .chat-button.send-button:hover {
+    background-color: #43A047;
+}
+
+.notebook-theme .chat-button:hover {
+  background-color: #66BB6A; /* Darker green */
+  transform: translateY(-1px);
+  box-shadow: 1px 2px 5px rgba(0,0,0,0.2);
+}
+.notebook-theme .chat-button:disabled {
+  background-color: #C8E6C9; /* Light green disabled */
+  border-color: #A5D6A7;
+  color: #7CB342;
+  cursor: not-allowed;
+}
+.notebook-theme .chat-button.mic-button.active {
+  background-color: #EF5350; /* Red when listening */
+  border-color: #E53935;
+}
+
+
+.notebook-theme .quick-prompt-button {
+  background-color: #FFECB3; /* Light yellow sticky note */
+  border: 1px dashed #FFCA28; /* Dashed yellow border */
+  color: #795548; /* Brown text */
+  font-family: 'Architects Daughter', cursive;
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.07);
+  transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s;
+  text-align: left;
+}
+.notebook-theme .quick-prompt-button:hover {
+  background-color: #FFE082;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+  transform: rotate(-1deg) scale(1.02); /* Slight tilt on hover */
+}
+.notebook-theme .quick-prompt-button svg {
+  color: #FFA000; /* Amber icon */
+  margin-right: 0.5rem;
+}
+
+/* Dialogs (Save Note Modal) */
+.notebook-theme .dialog-content-notebook {
+  background-color: #FFFBF0; /* Creamy paper background */
+  border: 3px solid #D2B48C; /* Tan "tape" border */
+  border-radius: 8px; /* Slightly rounded corners */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  font-family: 'Patrick Hand', cursive;
+  color: #5D4037; /* Brown text */
+}
+
+.notebook-theme .dialog-header-notebook {
+  border-bottom: 1px dashed #D3C9BC; /* Dashed separator */
+  padding-bottom: 0.75rem; /* Space below header */
+}
+
+.notebook-theme .dialog-title-notebook {
+  font-family: 'Caveat', cursive; /* Title font */
+  font-size: 2em; /* Larger title */
+  color: #4A3B31; /* Dark coffee color */
+  text-align: center;
+}
+.notebook-theme .dialog-title-notebook svg {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+  color: #8D6E63; /* Muted brown for icon */
+}
+
+.notebook-theme .dialog-input-notebook,
+.notebook-theme .dialog-textarea-notebook {
+  background-color: #fff;
+  border: 1px solid #E0D8CD; /* Paper edge border */
+  border-radius: 4px;
+  font-family: 'Kalam', cursive;
+  color: #333;
+  padding: 0.5rem 0.75rem;
+}
+.notebook-theme .dialog-input-notebook::placeholder,
+.notebook-theme .dialog-textarea-notebook::placeholder {
+  color: #A89F94;
+}
+
+.notebook-theme .dialog-tag-badge {
+  background-color: #E0F2F1; /* Light teal for tags */
+  color: #00796B;
+  border: 1px solid #B2DFDB;
+  font-family: 'Architects Daughter', cursive;
+  padding: 0.25rem 0.5rem;
+  border-radius: 10px; /* Pill shape */
+}
+.notebook-theme .dialog-tag-badge button {
+  margin-left: 0.3rem;
+  color: #004D40;
+}
+
+.notebook-theme .dialog-footer-notebook {
+  border-top: 1px dashed #D3C9BC;
+  padding-top: 0.75rem;
+}
+
+.notebook-theme .dialog-button-notebook {
+  font-family: 'Patrick Hand', cursive;
+  border-radius: 5px;
+  padding: 0.5rem 1rem;
+  transition: background-color 0.2s, transform 0.1s;
+  font-size: 1rem;
+}
+.notebook-theme .dialog-button-notebook.primary {
+  background-color: #66BB6A; /* Softer green */
+  color: white;
+  border: 1px solid #4CAF50;
+}
+.notebook-theme .dialog-button-notebook.primary:hover {
+  background-color: #5AA45E;
+  transform: translateY(-1px);
+}
+.notebook-theme .dialog-button-notebook.outline {
+  background-color: transparent;
+  border: 1px solid #A1887F; /* Brown "pencil" outline */
+  color: #8D6E63;
+}
+.notebook-theme .dialog-button-notebook.outline:hover {
+  background-color: #EFEBE9; /* Very light beige hover */
+  border-color: #795548;
+  color: #795548;
+}
+
+/* Context Panel */
+.notebook-theme .context-panel-notebook {
+  background-color: #FFFDE7; /* Very pale yellow, like notepad paper */
+  border-left: 2px solid #FFD54F; /* Amber left border, like a highlight */
+  padding: 1rem;
+}
+.notebook-theme .context-panel-header-notebook {
+  font-family: 'Caveat', cursive;
+  font-size: 1.5em;
+  color: #BF360C; /* Burnt orange for context header */
+  border-bottom: 1px dashed #FFCC80;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.notebook-theme .context-panel-item-notebook {
+  background-color: #FFF9C4; /* Slightly darker yellow for items */
+  border: 1px solid #FFF59D;
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  font-family: 'Kalam', cursive;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+}
+.notebook-theme .context-panel-button-notebook {
+  background-color: #FFB74D; /* Orange for add context button */
+  color: #4E342E;
+  font-family: 'Architects Daughter', cursive;
+}
+
+/* Styling for references in messages */
+.notebook-theme .message-references {
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed #BCAAA4; /* Dashed line separator */
+  font-size: 0.85em;
+}
+.notebook-theme .message-references strong {
+  font-family: 'Architects Daughter', cursive;
+  color: #795548; /* Brown for "References:" */
+}
+.notebook-theme .message-references ul {
+  list-style-type: none;
+  padding-left: 0;
+  margin-top: 0.25rem;
+}
+.notebook-theme .message-references li {
+  margin-bottom: 0.25rem;
+  display: flex; /* Align icon and text */
+  align-items: flex-start;
+}
+.notebook-theme .message-references li::before {
+  content: '📌'; /* Pin emoji for references */
+  margin-right: 0.4rem;
+  font-size: 0.9em;
+  color: #FF7043; /* Coral color for pin */
+  line-height: 1.4; /* Align with text */
+}
+.notebook-theme .message-references a {
+  color: #0277BD; /* Blue link color */
+  text-decoration: none;
+  border-bottom: 1px dotted #4FC3F7; /* Dotted underline */
+}
+.notebook-theme .message-references a:hover {
+  color: #01579B; /* Darker blue on hover */
+  border-bottom-style: solid;
+}
+
+/* Message Menu */
+.notebook-theme .message-menu {
+  background-color: #FFF8E1 !important; /* Light cream */
+  border: 1px solid #FFECB3 !important; /* Pale yellow border */
+  border-radius: 8px !important; /* Softer radius */
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.1) !important;
+}
+.notebook-theme .message-menu button {
+  color: #795548 !important; /* Brown text */
+  font-family: 'Architects Daughter', cursive !important;
+  border-radius: 6px !important;
+}
+.notebook-theme .message-menu button:hover {
+  background-color: #FFE0B2 !important; /* Light orange hover */
+  color: #5D4037 !important;
+}
+.notebook-theme .message-menu .separator {
+  background-color: #FFD54F !important; /* Amber separator */
+}
+
+/* === Additions/Modifications for Notebook Theme in src/index.css === */
+
+/* ... (your existing .notebook-theme styles) ... */
+
+.notebook-theme .chat-input-textarea {
+  /* ... (other styles for chat-input-textarea from previous response) ... */
+  /* Ensure this class handles the pr-12/pr-14 if not done inline in JSX for notebook theme */
+}
+
+.notebook-theme .chat-input-textarea.notebook-textarea-mic-inside {
+  padding-right: 3.5rem; /* Approx 56px: for a 44px button (2.75rem) + some spacing */
+}
+
+.notebook-theme .chat-button {
+  border-radius: 8px; /* Squarish for a 'drawn' feel */
+  background-color: #81C784; /* Soft Green */
+  color: white;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+  transition: background-color 0.2s, transform 0.2s;
+  border: 1px solid #66BB6A;
+  height: 2.75rem; /* Approx 44px */
+  width: 2.75rem; /* Approx 44px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem; /* Adjust padding for smaller icons */
+}
+
+/* Ensure icons within these buttons are sized via JSX for theme-specific control */
+.notebook-theme .chat-button svg {
+  /* Size is now controlled in JSX like className={useNotebookTheme ? "h-4 w-4" : "h-5 w-5"} */
+}
+
+.notebook-theme .chat-button.send-button {
+  background-color: #4CAF50; 
+  border-color: #388E3C;
+  width: 2.75rem; /* Keep send button consistent in size */
+  height: 2.75rem;
+}
+.notebook-theme .chat-button.send-button:hover {
+  background-color: #43A047;
+}
+.notebook-theme .chat-button:hover {
+  background-color: #66BB6A;
+  transform: translateY(-1px);
+  box-shadow: 1px 2px 5px rgba(0,0,0,0.2);
+}
+.notebook-theme .chat-button:disabled {
+  background-color: #C8E6C9;
+  border-color: #A5D6A7;
+  color: #7CB342;
+  cursor: not-allowed;
+}
+.notebook-theme .chat-button.mic-button.active {
+  background-color: #EF5350;
+  border-color: #E53935;
+}
+
+/* Styling for the Mic button when it's absolutely positioned within the textarea wrapper */
+.notebook-theme .input-area-wrapper .chat-button.mic-button {
+  /* No specific size override here if .chat-button is already 2.75rem */
+  /* Ensure it looks good with the notebook theme's .chat-button styles */
+  /* It will be positioned via inline styles or Tailwind in JSX */
+}
+
+/* === Paper Notebook Theme for NoteTabs === */
+
+/* Apply to the root of NotesTab when .notebook-theme is active */
+.notebook-theme .notetab-container {
+  background-color: #FAF0E6; /* Overall theme background */
+  font-family: 'Patrick Hand', cursive;
+  color: #3D2B1F; /* Default text color */
+  min-height: 100vh; /* Ensure it fills viewport height */
+}
+
+.notebook-theme .notetab-header-bar {
+  /* Styles for the header bar holding title and theme toggles */
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #E0D8CD;
+  background-color: rgba(253, 245, 230, 0.85); /* Transparent linen for backdrop */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.notebook-theme .notetab-title {
+  font-family: 'Caveat', cursive;
+  color: #4A3B31; /* Dark coffee brown */
+  font-size: 2rem; /* Prominent title */
+}
+
+.notebook-theme .notetab-header-button {
+  background-color: #FFFBF0; /* Light cream for buttons */
+  color: #5D4037; /* Brown text */
+  border: 1px solid #E0D8CD;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.05);
+}
+.notebook-theme .notetab-header-button:hover {
+  background-color: #F7F1E9;
+}
+.notebook-theme .notetab-header-button.active-theme-button { /* For active Palette button */
+    background-color: #FFE082; /* A distinct color for active theme button */
+    border-color: #FFCA28;
+}
+
+
+/* Note Editor Card */
+.notebook-theme .note-editor-card {
+  background-color: #FFFBF0; /* Light cream paper */
+  border: 1px solid #E0D8CD;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border-radius: 8px;
+}
+.notebook-theme .note-editor-card .note-editor-header {
+  border-bottom: 1px dashed #D3C9BC;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+}
+.notebook-theme .note-editor-card .note-editor-title {
+  font-family: 'Architects Daughter', cursive;
+  font-size: 1.5em;
+  color: #4A3B31;
+}
+
+.notebook-theme .note-title-input {
+  font-family: 'Caveat', cursive;
+  font-size: 2em; /* Larger for title */
+  border: none;
+  border-bottom: 2px dashed #D3C9BC; /* Dashed underline */
+  background-color: transparent;
+  padding: 0.25rem 0.1rem;
+  color: #4A3B31;
+}
+.notebook-theme .note-title-input::placeholder {
+  color: #A89F94;
+}
+
+.notebook-theme .note-content-textarea {
+  background-color: #fff; /* White paper for writing */
+  border: 1px solid #E0D8CD;
+  border-radius: 4px;
+  padding: 0.75rem;
+  font-family: 'Kalam', cursive;
+  line-height: 1.7em; /* Ample line height for handwritten feel */
+  color: #333;
+  min-height: 150px; /* Default height */
+  background-image: linear-gradient(to bottom, transparent 1.0em, #EAE0D6 1.0em, #EAE0D6 1.05em, transparent 1.05em); /* Adjusted lines */
+  background-size: 100% 1.7em; /* Match line-height */
+}
+.notebook-theme .note-content-textarea.expanded {
+  min-height: 300px; /* Or more, as needed */
+}
+
+.notebook-theme .note-tag-input-container input {
+  background-color: #F8F0E3; /* Slightly different paper for tag input */
+  border: 1px dashed #D3C9BC;
+  border-radius: 4px;
+  font-family: 'Architects Daughter', cursive;
+  padding: 0.5rem 0.75rem;
+  color: #5D4037;
+}
+.notebook-theme .note-tag-input-container button {
+  background-color: #FFDAB9; /* Peach for "Add Tag" */
+  color: #A0522D; /* Dark Peach/Brown */
+  border: 1px solid #FFC4A0;
+  font-family: 'Patrick Hand', cursive;
+}
+
+.notebook-theme .note-tag-badge {
+  background-color: #C8E6C9; /* Light green for tags, like washi tape */
+  color: #2E7D32;
+  border: 1px solid #A5D6A7;
+  font-family: 'Architects Daughter', cursive;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px; /* Rectangular tape-like */
+  box-shadow: 1px 1px 1px rgba(0,0,0,0.05);
+}
+.notebook-theme .note-tag-badge button:hover svg {
+  color: #B71C1C; /* Red for delete X on hover */
+}
+
+.notebook-theme .note-action-button {
+  background-color: #A9D18E; /* Muted green */
+  color: white;
+  border: 1px solid #8DBF6E;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+.notebook-theme .note-action-button:hover {
+  background-color: #97C97C;
+  transform: translateY(-1px);
+}
+.notebook-theme .note-action-button.save-button { /* Specific for Save button */
+  background-color: #66BB6A; /* Brighter green */
+  border-color: #4CAF50;
+}
+.notebook-theme .note-action-button.save-button:hover {
+  background-color: #5AA45E;
+}
+
+
+/* Summary Box */
+.notebook-theme .note-summary-box {
+  background-color: #E0F7FA; /* Light cyan background */
+  border: 1px dashed #4DD0E1; /* Cyan dashed border */
+  border-radius: 6px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+.notebook-theme .note-summary-box h3 { /* Summary title */
+  font-family: 'Architects Daughter', cursive;
+  color: #00796B; /* Teal title */
+  margin-bottom: 0.5rem;
+  font-size: 1.1em;
+}
+.notebook-theme .note-summary-box .prose {
+  font-family: 'Kalam', cursive;
+  color: #004D40; /* Dark teal text */
+  font-size: 0.95rem;
+}
+
+/* Notes Collection */
+.notebook-theme .notes-collection-header h2 {
+  font-family: 'Caveat', cursive;
+  font-size: 1.8em;
+  color: #4A3B31;
+  border-bottom: 2px solid #E0D8CD;
+  padding-bottom: 0.25rem;
+}
+
+.notebook-theme .notes-filter-controls input,
+.notebook-theme .notes-filter-controls button {
+  font-family: 'Architects Daughter', cursive;
+  border-radius: 6px;
+}
+.notebook-theme .notes-filter-controls input {
+  background-color: #FFFBF0;
+  border: 1px solid #E0D8CD;
+  color: #5D4037;
+}
+.notebook-theme .notes-filter-controls .filter-tag-button {
+  background-color: #FFF9C4; /* yellow for filter tags */
+  color: #795548;
+  border: 1px solid #FFF59D;
+}
+.notebook-theme .notes-filter-controls .filter-tag-button.active {
+  background-color: #FFECB3;
+  border-color: #FFCA28;
+  font-weight: bold;
+}
+
+
+/* Saved Note Card - Grid View */
+.notebook-theme .note-card-grid {
+  background-color: #FFFBF0; /* Creamy paper */
+  border: 1px solid #E0D8CD; /* Paper edge */
+  box-shadow: 2px 3px 6px rgba(0,0,0,0.08);
+  border-radius: 6px;
+  font-family: 'Patrick Hand', cursive;
+  color: #4A3B31;
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+.notebook-theme .note-card-grid:hover {
+  transform: translateY(-3px) rotate(-0.5deg);
+  box-shadow: 4px 6px 12px rgba(0,0,0,0.12);
+}
+.notebook-theme .note-card-grid h3 { /* Title in card */
+  font-family: 'Architects Daughter', cursive;
+  color: #5D4037;
+  font-size: 1.1em;
+}
+.notebook-theme .note-card-grid .note-card-content-preview {
+  font-family: 'Kalam', cursive;
+  font-size: 0.9em;
+  color: #795548;
+  border-top: 1px dashed #E0D8CD; /* Separator for content */
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+}
+.notebook-theme .note-card-grid .note-card-tag {
+  background-color: #FFDCC8; /* Light peach for tags in cards */
+  color: #BF360C; /* Burnt orange text */
+  font-size: 0.7em;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Architects Daughter', cursive;
+}
+
+/* Saved Note Item - List View */
+.notebook-theme .note-item-list {
+  background-color: #fff; /* Cleaner white for list items on lined bg */
+  border: 1px solid #EAE0D6;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.05);
+  border-radius: 4px;
+  font-family: 'Patrick Hand', cursive;
+  color: #4A3B31;
+}
+.notebook-theme .note-item-list:hover {
+  border-color: #D3C9BC;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.08);
+}
+.notebook-theme .note-item-list h3 {
+  font-family: 'Architects Daughter', cursive;
+  color: #5D4037;
+}
+
+/* Re-use dialog styles from AskTab for modals, ensure they are general enough or duplicate/prefix */
+/* .notebook-theme .dialog-content-notebook { ... } (already defined for AskTab) */
+/* .notebook-theme .dialog-header-notebook { ... } */
+/* etc. */
+
+/* Ensure buttons within modals also get notebook theme if not covered by general .dialog-button-notebook */
+.notebook-theme .lecture-upload-dialog-button { /* Example for specific modal buttons */
+  font-family: 'Patrick Hand', cursive;
+  background-color: #BCAAA4; /* Muted brown */
+  color: white;
+}
+.notebook-theme .lecture-upload-dialog-button:hover {
+  background-color: #A1887F;
+}
+
+
+/* === Paper Notebook Theme for FileSearch / Lecture Search Tab === */
+
+.notebook-theme .filesearch-page-container {
+  background-color: #FAF0E6; /* Overall theme background for the tab */
+  font-family: 'Patrick Hand', cursive;
+  color: #3D2B1F; /* Default text color */
+  padding-bottom: 2rem; /* Ensure content doesn't hide behind fixed elements if any */
+}
+
+.notebook-theme .filesearch-header-bar {
+  padding: 1rem 0; /* Padding for the header within the tab */
+  border-bottom: 1px dashed #E0D8CD; /* Dashed bottom border for a softer look */
+  margin-bottom: 1.5rem;
+}
+
+.notebook-theme .filesearch-title {
+  font-family: 'Caveat', cursive;
+  color: #4A3B31; /* Dark coffee brown */
+  font-size: 2.25rem; /* Prominent title */
+  text-align: left; /* Align to the left */
+}
+.notebook-theme .filesearch-title svg { /* Icon next to title */
+  color: #8D6E63; /* Muted brown */
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+
+.notebook-theme .filesearch-header-controls .notetab-header-button { /* Re-use button style if suitable */
+  background-color: #FFFBF0;
+  color: #5D4037;
+  border: 1px solid #E0D8CD;
+}
+.notebook-theme .filesearch-header-controls .notetab-header-button:hover {
+  background-color: #F7F1E9;
+}
+.notebook-theme .filesearch-header-controls .notetab-header-button.active-theme-button {
+    background-color: #FFE082;
+    border-color: #FFCA28;
+}
+
+
+/* Main Search Card */
+.notebook-theme .filesearch-main-card {
+  background-color: #FFFBF0; /* Light cream paper */
+  border: 1px solid #E0D8CD; /* Paper edge */
+  box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+  border-radius: 8px;
+}
+.notebook-theme .filesearch-main-card .filesearch-card-header {
+  font-family: 'Architects Daughter', cursive;
+  color: #4A3B31;
+  border-bottom: 1px dashed #D3C9BC;
+  padding: 1rem 1.5rem;
+}
+.notebook-theme .filesearch-main-card .filesearch-card-header h2 { /* Title inside card */
+  font-size: 1.5em;
+}
+.notebook-theme .filesearch-main-card .filesearch-card-header p { /* Description */
+  font-family: 'Patrick Hand', cursive;
+  color: #795548;
+}
+
+/* Search Input Area */
+.notebook-theme .filesearch-input-group input[type="search"] {
+  font-family: 'Kalam', cursive;
+  background-color: #fff;
+  border: 1px solid #D3C9BC; /* Softer border for input */
+  border-radius: 6px;
+  padding-left: 2.5rem; /* Space for search icon */
+  color: #4A3B31;
+}
+.notebook-theme .filesearch-input-group input[type="search"]::placeholder {
+  color: #A89F94;
+}
+.notebook-theme .filesearch-input-group .search-icon-absolute {
+  color: #A89F94; /* Icon color */
+}
+
+.notebook-theme .filesearch-action-button {
+  background-color: #FFC107; /* Amber/Yellow for primary actions */
+  color: #5D4037; /* Dark brown text for contrast */
+  font-family: 'Patrick Hand', cursive;
+  font-size: 1rem;
+  border: 1px solid #FFA000;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+  border-radius: 6px;
+}
+.notebook-theme .filesearch-action-button:hover {
+  background-color: #FFB300;
+}
+.notebook-theme .filesearch-action-button:disabled {
+  background-color: #FFE082;
+  color: #A1887F;
+  border-color: #FFECB3;
+}
+
+
+/* Filter Section */
+.notebook-theme .filesearch-filter-section {
+  background-color: #FDF5E6; /* Old Lace - slightly different paper for filters */
+  border: 1px dashed #EADCCF;
+  border-radius: 6px;
+  padding: 0.75rem;
+}
+.notebook-theme .filesearch-filter-section .filter-label {
+  font-family: 'Architects Daughter', cursive;
+  color: #795548;
+  font-size: 0.9em;
+}
+.notebook-theme .filesearch-filter-section .filter-button {
+  font-family: 'Patrick Hand', cursive;
+  background-color: #FFF9C4; /* Light yellow for filter buttons */
+  color: #795548;
+  border: 1px solid #FFF59D;
+  border-radius: 15px; /* Pill shape */
+  padding: 0.25rem 0.75rem;
+  font-size: 0.85em;
+}
+.notebook-theme .filesearch-filter-section .filter-button.active {
+  background-color: #FFECB3; /* Darker yellow for active */
+  border-color: #FFCA28;
+  font-weight: bold;
+}
+
+/* File Item Styling (Grid and List) */
+.notebook-theme .file-item-notebook { /* Base for both grid/list */
+  font-family: 'Kalam', cursive;
+  color: #4A3B31;
+  border-radius: 6px;
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+.notebook-theme .file-item-notebook:hover {
+  transform: translateY(-2px) rotate(-0.3deg);
+  box-shadow: 3px 4px 10px rgba(0,0,0,0.1);
+}
+
+.notebook-theme .file-item-grid {
+  background-color: #FFFFE0; /* CORRECTED: Was #FFFUD0 - Very light yellow, like an index card */
+  border: 1px solid #E0D8CD;
+  box-shadow: 1px 2px 4px rgba(0,0,0,0.06);
+  padding: 0.75rem;
+}
+.notebook-theme .file-item-grid .file-icon-area {
+  background-color: #FDF5E6; /* Old lace bg for icon */
+  border-radius: 4px;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.notebook-theme .file-item-grid .file-title {
+  font-family: 'Architects Daughter', cursive;
+  font-weight: bold;
+  font-size: 1em;
+  color: #5D4037;
+}
+.notebook-theme .file-item-grid .file-meta-text {
+  font-size: 0.8em;
+  color: #795548;
+}
+
+
+.notebook-theme .file-item-list {
+  background-color: #fff; /* White for list items on main paper */
+  border: 1px solid #EAE0D6;
+  box-shadow: 0px 1px 2px rgba(0,0,0,0.04);
+  padding: 0.75rem 1rem;
+}
+.notebook-theme .file-item-list .file-icon-area {
+  background-color: #FDF5E6;
+  border-radius: 4px;
+  padding: 0.4rem;
+  margin-right: 0.75rem;
+}
+.notebook-theme .file-item-list .file-title {
+  font-family: 'Architects Daughter', cursive;
+  font-weight: bold;
+  font-size: 1.05em; /* Slightly larger for list */
+  color: #5D4037;
+}
+.notebook-theme .file-item-list .file-meta-text {
+  font-size: 0.85em;
+  color: #795548;
+}
+
+/* File Status Badge */
+.notebook-theme .file-status-badge-notebook.ready {
+  background-color: #C8E6C9; color: #2E7D32; border: 1px solid #A5D6A7;
+}
+.notebook-theme .file-status-badge-notebook.processing {
+  background-color: #FFF9C4; color: #795548; border: 1px solid #FFF59D;
+}
+.notebook-theme .file-status-badge-notebook.error-badge { /* Renamed to avoid conflict */
+  background-color: #FFCDD2; color: #C62828; border: 1px solid #EF9A9A;
+}
+.notebook-theme .file-status-badge-notebook.unknown {
+  background-color: #F5F5F5; color: #757575; border: 1px solid #E0E0E0;
+}
+.notebook-theme .file-status-badge-notebook svg {
+  margin-right: 0.25rem;
+}
+
+/* Search Results Area */
+.notebook-theme .filesearch-results-area {
+  background-color: #FFFBF0; /* Creamy background for results */
+  border: 1px dashed #D3C9BC;
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  border-radius: 6px;
+}
+.notebook-theme .filesearch-results-area h3 { /* "Search Results" title */
+  font-family: 'Caveat', cursive;
+  font-size: 1.6em;
+  color: #4A3B31;
+  border-bottom: 1px solid #E0D8CD;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+.notebook-theme .filesearch-results-area .prose { /* Styling for the text content of results */
+  font-family: 'Kalam', cursive;
+  color: #4A3B31;
+}
+.notebook-theme .filesearch-results-area .prose strong,
+.notebook-theme .filesearch-results-area .prose b {
+    font-family: 'Patrick Hand', cursive; /* Bolder handwritten for emphasis */
+    color: #A0522D; /* Sienna for emphasis */
+}
+.notebook-theme .filesearch-results-area .prose a {
+  color: #0277BD; /* Blue link color */
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: #4FC3F7;
+}
+
+/* Empty/Loading States */
+.notebook-theme .filesearch-empty-state,
+.notebook-theme .filesearch-loading-state {
+  background-color: #FDF5E6;
+  border: 1px dashed #EADCCF;
+  padding: 2rem;
+  text-align: center;
+  border-radius: 6px;
+}
+.notebook-theme .filesearch-empty-state svg,
+.notebook-theme .filesearch-loading-state svg {
+  color: #BCAAA4; /* Muted icon color */
+  margin-bottom: 0.75rem;
+}
+.notebook-theme .filesearch-empty-state h3,
+.notebook-theme .filesearch-loading-state p {
+  font-family: 'Architects Daughter', cursive;
+  color: #795548;
+}
+
+/* Dialogs (re-use styles from AskTabs/NoteTabs or ensure they are themed) */
+.notebook-theme .dialog-content-notebook { /* Ensure this is applied to FileSearch modals if any */
+  /* ... (styles from previous responses for dialogs) ... */
+}
+.notebook-theme .dialog-content-notebook .dialog-title-notebook {
+    font-family: 'Caveat', cursive;
+    color: #4A3B31;
+}
+/* Add more specific styles for FileSearch modals if needed */
+
+/* === Paper Notebook Theme for StudyTabs (Flashcards, Quizzes, Progress) === */
+
+/* General container for each study tab when notebook theme is active */
+.notebook-theme .study-tab-pane-container {
+  background-color: #FAF0E6; /* Overall theme background */
+  font-family: 'Patrick Hand', cursive;
+  color: #3D2B1F; /* Default text color */
+  padding: 1.5rem; /* Add some padding to the tab content area */
+}
+
+/* Header bar within each study tab */
+.notebook-theme .study-tab-header-bar {
+  display: flex;
+  flex-direction: column; /* Stack title and controls on small screens */
+  gap: 0.75rem; /* Space between title group and button group */
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px dashed #E0D8CD; /* Dashed separator */
+}
+@media (min-width: 640px) { /* sm breakpoint */
+  .notebook-theme .study-tab-header-bar {
+    flex-direction: row; /* Row layout on larger screens */
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.notebook-theme .study-tab-title-group {
+  display: flex;
+  align-items: center;
+}
+
+.notebook-theme .study-tab-title-icon {
+  padding: 0.625rem; /* 10px */
+  margin-right: 0.75rem; /* 12px */
+  border-radius: 0.75rem; /* 12px */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+/* Specific icon background colors for each study tab */
+.notebook-theme .flashcard-tab-icon-bg { background-color: #E1BEE7; /* Light purple */ }
+.notebook-theme .quiz-tab-icon-bg { background-color: #C5E1A5; /* Light green */ }
+.notebook-theme .progress-tab-icon-bg { background-color: #81D4FA; /* Light blue */ }
+
+.notebook-theme .study-tab-title-icon svg {
+  height: 1.5rem; /* 24px */
+  width: 1.5rem; /* 24px */
+  color: white;
+}
+
+.notebook-theme .study-tab-title {
+  font-family: 'Caveat', cursive;
+  color: #4A3B31; /* Dark coffee brown */
+  font-size: 2rem;
+  line-height: 1.2;
+}
+.notebook-theme .study-tab-description {
+  font-family: 'Patrick Hand', cursive;
+  color: #795548; /* Muted brown */
+  font-size: 0.9rem;
+}
+
+.notebook-theme .study-tab-header-controls .notetab-header-button { /* Re-use style from NoteTabs */
+  background-color: #FFFBF0;
+  color: #5D4037;
+  border: 1px solid #E0D8CD;
+}
+.notebook-theme .study-tab-header-controls .notetab-header-button:hover {
+  background-color: #F7F1E9;
+}
+.notebook-theme .study-tab-header-controls .notetab-header-button.active-theme-button {
+    background-color: #FFE082; /* Yellow for active Palette */
+    border-color: #FFCA28;
+}
+
+
+/* Cards within Study Tabs */
+.notebook-theme .study-card-notebook { /* General card style for this section */
+  background-color: #FFFBF0; /* Light cream paper */
+  border: 1px solid #E0D8CD; /* Paper edge */
+  box-shadow: 0 3px 10px rgba(0,0,0,0.07);
+  border-radius: 8px;
+  overflow: hidden; /* Ensure child elements adhere to border radius */
+}
+.notebook-theme .study-card-notebook .study-card-header-notebook {
+  border-bottom: 1px dashed #D3C9BC;
+  padding: 1rem 1.25rem;
+  font-family: 'Architects Daughter', cursive;
+  color: #4A3B31;
+}
+.notebook-theme .study-card-notebook .study-card-header-notebook .card-title-text {
+  font-size: 1.3em;
+}
+.notebook-theme .study-card-notebook .study-card-header-notebook .card-description-text {
+  font-size: 0.9em;
+  color: #795548;
+}
+.notebook-theme .study-card-notebook .study-card-content-notebook {
+  padding: 1.25rem;
+}
+.notebook-theme .study-card-notebook .study-card-footer-notebook {
+  border-top: 1px dashed #D3C9BC;
+  padding: 1rem 1.25rem;
+  background-color: #FAF5EF; /* Slightly different footer bg */
+}
+
+/* Inputs and Selects */
+.notebook-theme .study-input-notebook,
+.notebook-theme .study-select-notebook {
+  background-color: #fff;
+  border: 1px solid #E0D8CD;
+  border-radius: 6px;
+  font-family: 'Kalam', cursive;
+  color: #4A3B31;
+  padding: 0.6rem 0.75rem;
+  height: 2.5rem; /* Consistent height */
+}
+.notebook-theme .study-input-notebook::placeholder {
+  color: #A89F94;
+}
+.notebook-theme .study-select-notebook {
+  appearance: none; /* Basic reset for custom arrow */
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23795548%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E');
+  background-repeat: no-repeat;
+  background-position: right .7em top 50%;
+  background-size: .65em auto;
+  padding-right: 2.5em;
+}
+
+
+/* Buttons */
+.notebook-theme .study-action-button {
+  background-color: #A9D18E; /* Muted green */
+  color: white;
+  border: 1px solid #8DBF6E;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 1rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 5px;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+}
+.notebook-theme .study-action-button:hover {
+  background-color: #97C97C;
+  transform: translateY(-1px);
+}
+.notebook-theme .study-action-button.primary { /* For main generate/start buttons */
+  background-color: #FFB74D; /* Orange */
+  color: #4E342E; /* Dark brown text */
+  border-color: #FFA726;
+}
+.notebook-theme .study-action-button.primary:hover {
+  background-color: #FFA726;
+}
+
+
+/* Flashcard Specific */
+.notebook-theme .flashcard-deck-card {
+  background-color: #FFF9C4; /* Light yellow for deck */
+  border: 1px dashed #FFECB3; /* Dashed border */
+  color: #795548;
+}
+.notebook-theme .flashcard-deck-card .deck-title {
+  font-family: 'Architects Daughter', cursive;
+  font-size: 1.2em;
+}
+.notebook-theme .flashcard-deck-card .deck-count-badge {
+  background-color: #FFE0B2; /* Lighter orange */
+  color: #E65100; /* Dark orange */
+  font-family: 'Patrick Hand', cursive;
+}
+
+/* Quiz Specific */
+.notebook-theme .quiz-option-button {
+  background-color: #fff;
+  border: 1px solid #E0D8CD;
+  color: #4A3B31;
+  font-family: 'Kalam', cursive;
+  justify-content: flex-start;
+  text-align: left;
+  padding: 0.75rem 1rem;
+}
+.notebook-theme .quiz-option-button:hover {
+  background-color: #F8F0E3;
+}
+.notebook-theme .quiz-option-button.selected {
+  background-color: #D1C4E9; /* Light purple for selected option */
+  border-color: #B39DDB;
+  color: #4527A0; /* Dark purple */
+}
+.notebook-theme .quiz-result-correct {
+  border-left-color: #66BB6A !important; /* Green for correct */
+  background-color: #E8F5E9 !important;
+}
+.notebook-theme .quiz-result-incorrect {
+  border-left-color: #EF5350 !important; /* Red for incorrect */
+  background-color: #FFEBEE !important;
+}
+
+
+/* Progress Specific */
+.notebook-theme .progress-item-card {
+  background-color: #E0F7FA; /* Light cyan */
+  border: 1px solid #B2EBF2;
+  color: #006064;
+}
+.notebook-theme .progress-item-card .progress-bar-notebook {
+  background-color: #B2EBF2; /* Lighter track */
+}
+.notebook-theme .progress-item-card .progress-bar-notebook > div { /* The actual progress fill */
+  background-color: #00ACC1; /* Cyan fill */
+}
+.notebook-theme .progress-item-card .progress-topic-title {
+  font-family: 'Architects Daughter', cursive;
+}
+
+/* StudyCard component when inside notebook theme */
+.notebook-theme .study-card-container {
+  /* Assuming StudyCard has a root class 'study-card-container' */
+  /* Override its default modern look with notebook styles */
+}
+.notebook-theme .study-card-container .study-card-front-notebook, /* Define new classes if StudyCard can take theme prop */
+.notebook-theme .study-card-container .study-card-back-notebook {
+  background-color: #fff; /* White paper for card face */
+  border: 2px dashed #D3C9BC;
+  border-radius: 10px;
+  box-shadow: 3px 3px 8px rgba(0,0,0,0.1);
+  font-family: 'Kalam', cursive;
+  color: #333;
+}
+.notebook-theme .study-card-container .study-card-front-notebook {
+  /* Lined paper effect for front if desired */
+  background-image: linear-gradient(to bottom, transparent 1.0em, #EAE0D6 1.0em, #EAE0D6 1.05em, transparent 1.05em);
+  background-size: 100% 1.7em;
+  line-height: 1.7em;
+}
+.notebook-theme .study-card-container .study-card-back-notebook {
+  background-color: #FFFDE7; /* Pale yellow for back */
+}
+.notebook-theme .study-card-container .study-card-button-notebook { /* For buttons within StudyCard */
+  font-family: 'Patrick Hand', cursive;
+  /* Add more styles if StudyCard buttons need theming */
+}
+
+/* === Creative Paper Notebook Theme for StudyPlanTab === */
+
+.notebook-theme .studyplan-tab-container {
+  background-color: #FDF5E6; /* Old Lace - a slightly warmer paper background */
+  font-family: 'Patrick Hand', cursive;
+  color: #4A3B31; /* Coffee brown text */
+  padding: 1.5rem;
+  border: 10px solid #EFEBE9; /* Border like a thick scrapbook album */
+  box-shadow: 0 0 15px rgba(0,0,0,0.1) inset, 0 0 0 10px #F8F5F2 inset; /* Inner shadow for depth */
+}
+
+/* Header Bar for StudyPlanTab */
+.notebook-theme .studyplan-header-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-bottom: 1.5rem;
+  margin-bottom: 2rem; /* More space */
+  border-bottom: 2px dashed #D2B48C; /* Tan dashed line, like stitching */
+  position: relative;
+}
+@media (min-width: 768px) { /* md breakpoint for row layout */
+  .notebook-theme .studyplan-header-bar {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+/* Decorative 'tape' on header */
+.notebook-theme .studyplan-header-bar::before,
+.notebook-theme .studyplan-header-bar::after {
+  content: '';
+  position: absolute;
+  width: 50px;
+  height: 25px;
+  background-color: rgba(255, 224, 130, 0.4); /* Semi-transparent tape */
+  border: 1px dashed rgba(204, 165, 80, 0.6);
+  transform: rotate(-4deg);
+  bottom: -15px; /* Overlap the dashed line */
+}
+.notebook-theme .studyplan-header-bar::before { left: 20px; }
+.notebook-theme .studyplan-header-bar::after { right: 20px; transform: rotate(4deg); }
+
+
+.notebook-theme .studyplan-title-group { display: flex; align-items: center; }
+.notebook-theme .studyplan-title-icon-bg {
+  background-color: #FFAB91; /* Light Coral */
+  padding: 0.75rem;
+  margin-right: 1rem;
+  border-radius: 10px; /* Softer square */
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+  border: 2px solid white; /* White "sticker" border */
+}
+.notebook-theme .studyplan-title-icon-bg svg { height: 1.75rem; width: 1.75rem; color: white; }
+
+.notebook-theme .studyplan-title {
+  font-family: 'Caveat', cursive;
+  color: #BF360C; /* Burnt Orange */
+  font-size: 2.5rem; /* Bigger title */
+  text-shadow: 1px 1px 0px #FFF9C4; /* Slight yellow shadow */
+}
+.notebook-theme .studyplan-description {
+  font-family: 'Architects Daughter', cursive;
+  color: #795548; /* Muted brown */
+  font-size: 1rem;
+  margin-top: 0.25rem;
+}
+
+/* Theme toggles in header - reuse existing .notetab-header-button styles */
+.notebook-theme .studyplan-header-controls .notetab-header-button {
+  /* Use the same from NoteTabs: bg #FFFBF0, border #E0D8CD, etc. */
+  /* Or define new ones for more creativity */
+  background-color: #FFF9E6; /* Lighter yellow */
+  border: 1px dashed #FFE0B2; /* Dashed border */
+  color: #FF8F00; /* Amber text */
+  border-radius: 50%; /* Round buttons */
+  height: 2.5rem; width: 2.5rem;
+}
+.notebook-theme .studyplan-header-controls .notetab-header-button.active-theme-button {
+  background-color: #FFCA28; border-color: #FFA000; color: #795548;
+}
+
+/* Main Card for Plan Setup or Active Plan View */
+.notebook-theme .studyplan-card {
+  background-color: #FFFFF0; /* Ivory paper */
+  border: 1px solid #F0E68C; /* Khaki border, like aged paper */
+  box-shadow: 3px 3px 8px rgba(0,0,0,0.08), 
+              0 0 0 5px #FFF8DC; /* Cornellian red inner border/matting */
+  border-radius: 6px;
+  margin-bottom: 2rem; /* Space between main cards */
+}
+.notebook-theme .studyplan-card-header {
+  font-family: 'Architects Daughter', cursive;
+  color: #5D4037; /* Brown text */
+  border-bottom: 1px solid #E0D8CD; /* Lighter separator */
+  background-color: #FAF0E6; /* Linen header bg */
+  padding: 1.25rem 1.5rem;
+}
+.notebook-theme .studyplan-card-header .card-title-text { font-size: 1.5em; }
+.notebook-theme .studyplan-card-header .card-description-text { font-size: 0.95em; color: #8D6E63; }
+
+.notebook-theme .studyplan-card-content { padding: 1.5rem; }
+.notebook-theme .studyplan-card-footer {
+  border-top: 1px solid #E0D8CD;
+  padding: 1.25rem 1.5rem;
+  background-color: #FAF5EF;
+}
+
+/* Inputs for Plan Setup */
+.notebook-theme .studyplan-input,
+.notebook-theme .studyplan-select,
+.notebook-theme .studyplan-modal-input, /* For modals */
+.notebook-theme .studyplan-modal-textarea,
+.notebook-theme .studyplan-modal-select {
+  background-color: #fff;
+  border: 1px solid #D2B48C; /* Tan border */
+  border-radius: 4px; /* Slightly less round */
+  font-family: 'Kalam', cursive;
+  color: #4A3B31;
+  padding: 0.75rem;
+  box-shadow: inset 1px 1px 2px rgba(0,0,0,0.05);
+}
+.notebook-theme .studyplan-label {
+  font-family: 'Architects Daughter', cursive;
+  color: #A1887F; /* Muted brown label */
+  font-size: 0.95em;
+  margin-bottom: 0.3rem;
+}
+
+/* Goals/Exams Sections - "Corkboard" or "Pasted Paper" Look */
+.notebook-theme .items-section-notebook {
+  background-color: #F5E8DD; /* Light tan, like corkboard or Kraft paper */
+  border: 2px solid #D2B48C; /* Darker tan border */
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.1) inset;
+}
+.notebook-theme .items-section-notebook h3 { /* Section title (Goals, Exams) */
+  font-family: 'Caveat', cursive;
+  font-size: 1.4em;
+  color: #795548; /* Brown */
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px dashed #BCAAA4;
+}
+.notebook-theme .items-section-notebook .add-item-button {
+  font-family: 'Patrick Hand', cursive;
+  background-color: #FFECB3; /* Light yellow */
+  color: #795548;
+  border: 1px dashed #FFCA28; /* Dashed for 'sketchy' button */
+  border-radius: 20px 5px 20px 5px; /* Irregular button shape */
+  padding: 0.4rem 0.8rem;
+}
+.notebook-theme .items-section-notebook .add-item-button:hover {
+  background-color: #FFE082;
+}
+
+/* Individual Goal/Exam Items - Styled like "Sticky Notes" or "Pinned Cards" */
+.notebook-theme .item-card-notebook {
+  background-color: #FFFFE0; /* Light yellow sticky note */
+  border: 1px solid #CCC; /* Simple border */
+  border-left: 5px solid #FFB74D; /* Orange left accent like a tab */
+  border-radius: 3px;
+  padding: 0.75rem;
+  font-family: 'Kalam', cursive;
+  color: #5D4037;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  transform: rotate(-1deg); /* Slight tilt */
+  margin-bottom: 0.5rem; /* Space them out */
+  transition: transform 0.1s ease-in-out;
+}
+.notebook-theme .item-card-notebook:nth-child(odd) {
+  transform: rotate(1deg); /* Alternate tilt */
+  background-color: #E0F7FA; /* Light cyan for variety */
+  border-left-color: #4DD0E1;
+}
+.notebook-theme .item-card-notebook:hover {
+  transform: rotate(0deg) scale(1.02);
+  box-shadow: 3px 3px 6px rgba(0,0,0,0.15);
+}
+.notebook-theme .item-card-notebook .item-title { font-weight: bold; font-size: 1.05em; }
+.notebook-theme .item-card-notebook .item-meta { font-size: 0.8em; color: #A1887F; }
+.notebook-theme .item-card-notebook .item-actions button {
+  background-color: transparent;
+  padding: 0.25rem; /* Smaller padding */
+}
+.notebook-theme .item-card-notebook .item-actions button svg {
+  color: #A1887F;
+}
+.notebook-theme .item-card-notebook .item-actions button:hover svg {
+  color: #5D4037;
+}
+
+
+/* Generate Plan Button - Make it look like a "GO!" sticker */
+.notebook-theme .generate-plan-button {
+  font-family: 'Caveat', cursive;
+  font-size: 1.4rem;
+  padding: 0.8rem 2rem;
+  background: linear-gradient(135deg, #81C784, #A5D6A7); /* Green gradient */
+  color: white;
+  border: none;
+  border-radius: 50px 10px 50px 10px; /* Funky shape */
+  box-shadow: 3px 3px 6px rgba(0,0,0,0.2), 0 0 0 3px white, 0 0 0 5px #66BB6A; /* Sticker effect */
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
+  transition: transform 0.1s ease-out;
+}
+.notebook-theme .generate-plan-button:hover {
+  transform: scale(1.03) rotate(-1deg);
+}
+.notebook-theme .generate-plan-button:disabled {
+  background: #E0E0E0;
+  box-shadow: none;
+  color: #9E9E9E;
+}
+
+
+/* Active Plan - Weekly Overview Day Item */
+.notebook-theme .active-plan-weekly-overview .day-item-notebook {
+  background-color: #FFF8E1; /* Light cream/yellow paper */
+  border: 1px solid #FFECB3;
+  padding: 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  position: relative; /* For "bookmark" */
+}
+.notebook-theme .active-plan-weekly-overview .day-item-notebook:hover {
+  border-color: #FFD54F;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.notebook-theme .active-plan-weekly-overview .day-item-notebook.selected {
+  background-color: #FFECB3; /* Highlighted paper */
+  border-color: #FFCA28;
+  box-shadow: 0 0 0 3px #FFD54F, 0 2px 5px rgba(0,0,0,0.1); /* Planner ring highlight */
+}
+.notebook-theme .active-plan-weekly-overview .day-item-notebook.selected::after { /* Bookmark tab */
+  content: '';
+  position: absolute;
+  top: -1px; right: 10px;
+  width: 20px; height: 30px;
+  background-color: #FFB74D; /* Orange tab */
+  border: 1px solid #FFA726;
+  border-bottom: none;
+  border-radius: 5px 5px 0 0;
+  box-shadow: 0 -1px 2px rgba(0,0,0,0.1);
+}
+
+.notebook-theme .active-plan-weekly-overview .day-title {
+  font-family: 'Caveat', cursive;
+  font-weight: bold;
+  font-size: 1.3em;
+  color: #A1887F; /* Muted Brown */
+}
+.notebook-theme .active-plan-weekly-overview .day-date {
+  font-family: 'Kalam', cursive;
+  font-size: 0.85em;
+  color: #BCAAA4;
+}
+.notebook-theme .active-plan-weekly-overview .day-sessions-badge {
+  background-color: #FFDCC8; /* Light peach */
+  color: #BF360C; /* Burnt orange */
+  font-family: 'Patrick Hand', cursive;
+  padding: 0.2rem 0.5rem;
+  border-radius: 10px;
+}
+.notebook-theme .active-plan-weekly-overview .day-progress-bar .progress-bar-notebook {
+  background-color: #FFE0B2; 
+}
+.notebook-theme .active-plan-weekly-overview .day-progress-bar .progress-bar-notebook > div {
+  background-color: #FFB74D; /* Orange progress */
+}
+
+/* Active Plan - Daily Schedule Session Item */
+.notebook-theme .active-plan-daily-schedule .session-item-notebook {
+  background-color: #fff; /* White lined paper section */
+  border: 1px solid #F0E68C; /* Khaki border */
+  padding: 1rem;
+  border-radius: 4px;
+  background-image: linear-gradient(to bottom, transparent 1.1em, #EFEBE9 1.1em, #EFEBE9 1.15em, transparent 1.15em);
+  background-size: 100% 1.8em;
+  line-height: 1.8em;
+  margin-bottom: 0.75rem;
+}
+.notebook-theme .active-plan-daily-schedule .session-item-notebook.completed {
+  background-color: #F1F8E9;
+  border-color: #C8E6C9;
+  opacity: 0.7;
+  background-image: linear-gradient(to bottom, transparent 1.1em, #E0E0E0 1.1em, #E0E0E0 1.15em, transparent 1.15em); /* Lighter lines for completed */
+}
+.notebook-theme .active-plan-daily-schedule .session-item-notebook.completed .session-topic {
+  text-decoration: line-through;
+  text-decoration-color: #A5D6A7; /* Green strikethrough */
+  text-decoration-style: wavy;
+}
+
+.notebook-theme .active-plan-daily-schedule .session-time {
+  font-family: 'Architects Daughter', cursive;
+  color: #A1887F;
+  font-size: 0.9em;
+}
+.notebook-theme .active-plan-daily-schedule .session-topic {
+  font-family: 'Caveat', cursive;
+  font-size: 1.4em;
+  color: #5D4037; /* Brown */
+}
+.notebook-theme .active-plan-daily-schedule .session-activity {
+  font-family: 'Kalam', cursive;
+  font-size: 1em;
+  color: #795548;
+}
+
+.notebook-theme .active-plan-daily-schedule .session-toggle-button {
+  font-family: 'Patrick Hand', cursive;
+  border-radius: 50%; /* Round check buttons */
+  height: 2.25rem; width: 2.25rem;
+  padding: 0;
+  border: 1px solid;
+}
+.notebook-theme .active-plan-daily-schedule .session-toggle-button.mark-done {
+  background-color: #FFEBEE; /* Light pink */
+  color: #D32F2F; /* Red */
+  border-color: #FFCDD2;
+}
+.notebook-theme .active-plan-daily-schedule .session-toggle-button.completed-button {
+  background-color: #E8F5E9; /* Light green */
+  color: #388E3C; /* Green */
+  border-color: #C8E6C9;
+}
+.notebook-theme .active-plan-daily-schedule .session-toggle-button svg {
+    margin: 0; /* Remove default margin for icon-only button */
+}
+
+/* Modal styling for goal/exam forms - should inherit from .dialog-content-notebook from NoteTabs if general */
+/* Make sure the input styles are specific enough or that .studyplan-modal-input is applied */
+
+/* === Creative Journal/Planner Notebook Theme for WellnessTab === */
+
+.notebook-theme .wellnesstab-container {
+  background-color: #FDF5E6; /* Warm, creamy paper background */
+  font-family: 'Patrick Hand', cursive;
+  color: #5D4037; /* Soft, earthy brown text */
+  padding: 1.5rem;
+  border: 8px solid #F0E6DD; /* Thick, textured border like a journal cover */
+  box-shadow: 0 0 0 8px #FFFBF0 inset, 0 5px 15px rgba(0,0,0,0.1); /* Inner matting and outer shadow */
+}
+
+/* Header Bar for WellnessTab */
+.notebook-theme .wellnesstab-header-bar {
+  display: flex;
+  flex-direction: column; /* Mobile first */
+  gap: 0.75rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px dashed #D4CCC5; /* Softer, stitched-like dashed line */
+  position: relative;
+}
+@media (min-width: 640px) { /* sm breakpoint */
+  .notebook-theme .wellnesstab-header-bar {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+/* Decorative elements for header */
+.notebook-theme .wellnesstab-header-bar::after {
+  content: '🌿'; /* Leaf emoji or SVG for wellness */
+  position: absolute;
+  right: 0;
+  top: -10px;
+  font-size: 1.8rem;
+  opacity: 0.6;
+  transform: rotate(15deg);
+}
+
+.notebook-theme .wellnesstab-title-group { display: flex; align-items: center; }
+.notebook-theme .wellnesstab-title-icon-bg {
+  background: linear-gradient(135deg, #FFCCBC, #FFAB91); /* Soft coral gradient */
+  padding: 0.6rem; /* Slightly smaller */
+  margin-right: 0.85rem;
+  border-radius: 50%; /* Circular icon bg */
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+  border: 2px solid white;
+}
+.notebook-theme .wellnesstab-title-icon-bg svg { height: 1.6rem; width: 1.6rem; color: white; }
+
+.notebook-theme .wellnesstab-title {
+  font-family: 'Caveat', cursive;
+  color: #BF360C; /* Deep, warm orange */
+  font-size: 2.25rem;
+  text-shadow: 1px 1px 0px rgba(255,255,255,0.7);
+}
+.notebook-theme .wellnesstab-description {
+  font-family: 'Architects Daughter', cursive;
+  color: #8D6E63; /* Muted brown */
+  font-size: 0.95rem;
+}
+
+.notebook-theme .wellnesstab-header-controls .notetab-header-button { /* Re-use for consistency */
+  background-color: #FFF9E6; border: 1px dashed #FFE0B2; color: #FF8F00;
+  border-radius: 8px; /* Softly rounded squares */
+}
+.notebook-theme .wellnesstab-header-controls .notetab-header-button.active-theme-button {
+  background-color: #FFECB3; border-color: #FFCA28;
+}
+
+/* Mental Health Check-In Card - Main Journal Page */
+.notebook-theme .wellness-checkin-card {
+  background-color: #FFFFF0; /* Ivory main page */
+  border: 1px solid #E0E0E0; /* Light gray subtle border */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  border-radius: 10px;
+  /* Add a "bookmark ribbon" */
+  position: relative;
+  overflow: visible; /* To allow ribbon to peek out */
+}
+.notebook-theme .wellness-checkin-card::before { /* Bookmark ribbon */
+  content: '';
+  position: absolute;
+  top: -1px; /* Align with top border */
+  left: 20px;
+  width: 30px;
+  height: 45px; /* Length of the ribbon */
+  background-color: #AED581; /* Soft calming green */
+  border: 1px solid #9CCC65;
+  border-top: none; /* No top border for ribbon */
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 85%, 0 100%); /* Ribbon shape */
+  z-index: 1;
+}
+
+.notebook-theme .wellness-checkin-card-header {
+  font-family: 'Architects Daughter', cursive;
+  color: #5D4037;
+  border-bottom: 1px dashed #E0D8CD;
+  background-color: rgba(240, 240, 240, 0.2); /* Very subtle header bg */
+  padding: 1.25rem 1.5rem;
+}
+.notebook-theme .wellness-checkin-card-header .card-title-text { font-size: 1.4em; color: #00695C; /* Teal */ }
+.notebook-theme .wellness-checkin-card-header .card-description-text { font-size: 0.9em; color: #00897B; }
+
+.notebook-theme .wellness-checkin-card-content { padding: 1.5rem; }
+
+/* Chat Area in Check-in Card */
+.notebook-theme .wellness-chat-display {
+  background-color: #fff; /* Clean white for chat lines */
+  padding: 1rem;
+  border-radius: 6px;
+  border: 1px solid #F0F0F0;
+  background-image: linear-gradient(to bottom, transparent 1.1em, #F5F5F5 1.1em, #F5F5F5 1.15em, transparent 1.15em);
+  background-size: 100% 1.9em; /* Slightly wider lines for journal */
+  line-height: 1.9em;
+}
+
+.notebook-theme .wellness-chat-message { /* Wrapper for user/AI bubble + avatar */
+  margin-bottom: 1.25em;
+}
+.notebook-theme .wellness-message-bubble { /* The actual message bubble */
+  padding: 0.75rem 1rem;
+  border-radius: 15px; /* More bubbly */
+  font-family: 'Kalam', cursive;
+  font-size: 0.95rem;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.05);
+  max-width: 80%;
+  border: 1px solid;
+}
+.notebook-theme .wellness-message-user .wellness-message-bubble {
+  background-color: #E3F2FD; /* Light blue */
+  color: #0D47A1; /* Dark blue */
+  border-color: #BBDEFB;
+  border-radius: 15px 15px 5px 15px; /* User bubble shape */
+}
+.notebook-theme .wellness-message-ai .wellness-message-bubble {
+  background-color: #FFF8E1; /* Pale yellow, like a kind note */
+  color: #795548; /* Brown text */
+  border-color: #FFECB3;
+  border-radius: 15px 15px 15px 5px; /* AI bubble shape */
+}
+.notebook-theme .wellness-message-ai .ai-insights-header { /* For "Dorathy's Insights" */
+  font-family: 'Architects Daughter', cursive;
+  font-size: 0.85em;
+  color: #4E342E; /* Darker brown */
+  margin-bottom: 0.3rem;
+}
+.notebook-theme .wellness-message-ai .ai-insights-header svg { color: #FFAB91; } /* Coral sparkles */
+
+/* Mood/Stress visuals - make them look like hand-drawn icons or stickers */
+.notebook-theme .mood-stress-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 15px; /* Pill shape */
+  font-family: 'Architects Daughter', cursive;
+  font-size: 0.8em;
+  border-width: 1px;
+  border-style: dashed; /* Dashed border for "sticker" feel */
+}
+.notebook-theme .mood-stress-badge svg {
+  margin-right: 0.3rem;
+  height: 1.1em; width: 1.1em;
+}
+.notebook-theme .mood-good { background-color: #DCEDC8; color: #558B2F; border-color: #AED581;}
+.notebook-theme .mood-okay { background-color: #FFF59D; color: #F9A825; border-color: #FFECB3;}
+.notebook-theme .mood-stressed { background-color: #FFCCBC; color: #D84315; border-color: #FFAB91;}
+.notebook-theme .stress-low { background-color: #C8E6C9; color: #2E7D32; border-color: #A5D6A7;}
+.notebook-theme .stress-medium { background-color: #FFF9C4; color: #AFB42B; border-color: #FFF59D;}
+.notebook-theme .stress-high { background-color: #FFCDD2; color: #C62828; border-color: #EF9A9A;}
+
+
+/* Input Area */
+.notebook-theme .wellness-input-area {
+  border-top: 1px dashed #E0D8CD;
+  padding-top: 1rem;
+}
+.notebook-theme .wellness-input-textarea {
+  background-color: #FFFDF5; /* Slightly off-white for input section */
+  border: 1px solid #F0E6DD; /* Very soft border */
+  border-radius: 8px;
+  font-family: 'Kalam', cursive;
+  color: #5D4037;
+  padding: 0.75rem;
+  box-shadow: inset 1px 1px 3px rgba(0,0,0,0.04);
+  line-height: 1.6;
+}
+.notebook-theme .wellness-input-textarea::placeholder { color: #A1887F; }
+
+.notebook-theme .wellness-send-button {
+  border-radius: 50%; /* Keep it round and friendly */
+  background: linear-gradient(135deg, #80CBC4, #4DB6AC); /* Teal gradient */
+  color: white;
+  border: 2px solid white; /* Sticker like border */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  height: 3rem; width: 3rem; /* Slightly larger send button */
+}
+.notebook-theme .wellness-send-button:hover {
+  background: linear-gradient(135deg, #4DB6AC, #26A69A);
+  box-shadow: 0 3px 7px rgba(0,0,0,0.2);
+}
+.notebook-theme .wellness-send-button svg { height: 1.25rem; width: 1.25rem; }
+
+/* Previous Check-ins Card */
+.notebook-theme .wellness-history-card { /* Similar to checkin card */
+  background-color: #FAF5EF; /* Slightly different paper for history */
+  border: 1px solid #EAE0D6;
+  border-radius: 8px;
+}
+.notebook-theme .wellness-history-card-header {
+  font-family: 'Architects Daughter', cursive;
+  color: #A1887F; /* Muted title */
+  border-bottom: 1px dashed #E0D8CD;
+}
+.notebook-theme .wellness-history-item {
+  background-color: #fff;
+  border: 1px solid #F0F0F0;
+  border-left: 4px solid #FFCC80; /* Orange accent for past entries */
+  border-radius: 4px;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+.notebook-theme .wellness-history-item .history-date {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 0.8em;
+  color: #BCAAA4; /* Light gray date stamp */
+}
+
+/* Wellness Resources Section */
+.notebook-theme .wellness-resources-section-card {
+  background-color: #E8F5E9; /* Mint green background for resources section */
+  border: 1px solid #C8E6C9;
+  border-radius: 8px;
+}
+.notebook-theme .wellness-resource-item-card {
+  background-color: #fff;
+  border: 1px solid #D7CCC8; /* Light brown paper border */
+  border-radius: 6px;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.notebook-theme .wellness-resource-item-card:hover {
+  transform: translateY(-3px) rotate(0.5deg);
+  box-shadow: 3px 4px 8px rgba(0,0,0,0.1);
+}
+.notebook-theme .wellness-resource-item-card .resource-icon-bg {
+  padding: 0.5rem;
+  border-radius: 50%;
+  margin-right: 0.75rem;
+  display: inline-flex; /* For icon centering */
+}
+/* Colors for resource icons */
+.notebook-theme .resource-icon-stress { background-color: #FFEBEE; color: #D32F2F;} /* Light red bg, dark red icon */
+.notebook-theme .resource-icon-productivity { background-color: #E3F2FD; color: #1565C0;} /* Light blue bg, dark blue icon */
+.notebook-theme .resource-icon-selfcare { background-color: #E0F2F1; color: #00695C;} /* Light teal bg, dark teal icon */
+
+.notebook-theme .wellness-resource-item-card .resource-title {
+  font-family: 'Architects Daughter', cursive;
+  color: #5D4037;
+  font-size: 1.1em;
+}
+.notebook-theme .wellness-resource-item-card .resource-item-list li {
+  font-family: 'Kalam', cursive;
+  font-size: 0.85em;
+  color: #795548;
+  list-style-type: '🌿 '; /* Leaf bullet */
+  padding-left: 0.3rem;
+}
+.notebook-theme .wellness-resource-item-card .resource-action-button {
+  font-family: 'Patrick Hand', cursive;
+  background-color: #F5F5F5; /* Light gray button */
+  color: #616161;
+  border: 1px solid #E0E0E0;
+  font-size: 0.85rem;
+}
+
+/* "Need More Support?" Box */
+.notebook-theme .wellness-support-box {
+  background-color: #FFF9C4; /* Yellow note paper */
+  border: 2px dashed #FFEB3B; /* Bright yellow dashed border */
+  border-radius: 4px;
+  padding: 1rem;
+  position: relative;
+}
+/* "Paperclip" for support box */
+.notebook-theme .wellness-support-box::before {
+  content: '📎';
+  font-size: 1.5rem;
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  transform: rotate(-25deg);
+  color: #757575;
+}
+.notebook-theme .wellness-support-box .support-title {
+  font-family: 'Caveat', cursive;
+  font-size: 1.2em;
+  color: #C62828; /* Urgent red */
+}
+.notebook-theme .wellness-support-box .support-text {
+  font-family: 'Kalam', cursive;
+  font-size: 0.9em;
+  color: #795548;
+}
+.notebook-theme .wellness-support-box .support-button {
+  font-family: 'Patrick Hand', cursive;
+  background-color: #FFCC80; /* Light orange */
+  color: #A1887F; /* Muted brown */
+  border: 1px solid #FFB74D;
+}
+
+/* === Mindblowing Creative Notebook/Journal Theme for DailyDigestTab === */
+
+.notebook-theme .dailydigest-tab-container {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d2b48c' fill-opacity='0.1'%3E%3Cpath d='M36 0c-5.523 0-10 4.477-10 10s4.477 10 10 10c5.522 0 10-4.477 10-10S41.523 0 36 0zm0 30c-5.523 0-10 4.477-10 10s4.477 10 10 10c5.522 0 10-4.477 10-10S41.523 30 36 30zM0 30c-5.523 0-10 4.477-10 10S-5.523 50 0 50s10-4.477 10-10S5.523 30 0 30z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+                    linear-gradient(to bottom right, #FDF5E6, #FAF0E0); /* Parchment gradient + subtle pattern */
+  font-family: 'Patrick Hand', cursive;
+  color: #4A3B31; /* Deep Sepia */
+  padding: 1.5rem;
+  border: 1px solid #D2B48C; /* Tan border */
+  box-shadow: 0 0 20px rgba(0,0,0,0.1) inset; /* Soft inner shadow */
+  min-height: 100vh;
+}
+
+/* Header Bar */
+.notebook-theme .dailydigest-header-bar {
+  text-align: center; /* Center title */
+  padding-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid transparent; /* No visible border, use pseudo-elements */
+  position: relative;
+}
+/* Ornate header separator */
+.notebook-theme .dailydigest-header-bar::after {
+  content: '';
+  position: absolute;
+  bottom: -10px; /* Below where a border would be */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 20px; /* Height of the flourish */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20'%3E%3Cpath d='M0 10 Q 25 0, 50 10 T 100 10' stroke='%23BCAAA4' stroke-width='1.5' fill='none' stroke-dasharray='3,3'/%3E%3C/svg%3E"); /* SVG flourish */
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.notebook-theme .dailydigest-title-group { /* Still used for icon + text alignment */
+  display: flex;
+  flex-direction: column; /* Stack icon above title */
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.notebook-theme .dailydigest-title-icon-bg {
+  background: linear-gradient(45deg, #FFD54F, #FFB300); /* Golden Sun */
+  padding: 0.8rem;
+  margin-bottom: 0.5rem; /* Space between icon and title */
+  border-radius: 50%;
+  box-shadow: 0 3px 6px rgba(255,179,0,0.3), 0 0 0 3px white, 0 0 0 5px #FFB300; /* Sunburst effect */
+  display: inline-block;
+}
+.notebook-theme .dailydigest-title-icon-bg svg { height: 2rem; width: 2rem; color: white; }
+
+.notebook-theme .dailydigest-title {
+  font-family: 'Caveat', cursive;
+  font-weight: 700;
+  color: #8D6E63; /* Earthy Brown */
+  font-size: 2.8rem; /* Grand title */
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 1px #FFF9C4;
+}
+.notebook-theme .dailydigest-description {
+  font-family: 'Architects Daughter', cursive;
+  color: #A1887F; /* Muted Sepia */
+  font-size: 1rem;
+  margin-top: 0.25rem;
+}
+
+.notebook-theme .dailydigest-header-controls .notetab-header-button {
+  background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent buttons */
+  border: 1px solid rgba(210, 180, 140, 0.5); /* Tan border */
+  color: #8D6E63;
+  border-radius: 6px;
+  backdrop-filter: blur(2px);
+}
+.notebook-theme .dailydigest-header-controls .notetab-header-button.active-theme-button {
+  background-color: rgba(255, 202, 40, 0.7); /* Goldish yellow for active palette */
+  border-color: rgba(255, 160, 0, 0.7);
+}
+
+/* Digest Generator Card - "Scroll" or "Parchment" */
+.notebook-theme .digest-generator-card {
+  background-color: #FFFDF5; /* Creamy parchment */
+  border: 1px solid #EAE0D6; /* Subtle edge */
+  border-radius: 5px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08), 
+              0 0 0 8px #FDF5E6, /* Outer matting to blend with page */
+              0 0 0 10px #EAE0D6; /* Darker edge for scroll */
+  padding: 1.5rem;
+  position: relative;
+}
+/* Scroll-like top and bottom edges */
+.notebook-theme .digest-generator-card::before,
+.notebook-theme .digest-generator-card::after {
+  content: '';
+  position: absolute;
+  left: -10px; right: -10px;
+  height: 20px;
+  background-color: #EAE0D6; /* Rolled paper color */
+  border: 1px solid #D2B48C;
+  box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+}
+.notebook-theme .digest-generator-card::before { top: -10px; border-radius: 10px 10px 0 0; }
+.notebook-theme .digest-generator-card::after { bottom: -10px; border-radius: 0 0 10px 10px; }
+
+.notebook-theme .digest-generator-card .digest-card-header {
+  font-family: 'Architects Daughter', cursive;
+  color: #795548;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+.notebook-theme .digest-generator-card .digest-card-header .card-title-text {
+  font-size: 1.6em;
+  color: #5D4037;
+}
+
+.notebook-theme .digest-time-input-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+.notebook-theme .digest-time-input { /* Input for available time */
+  background-color: #fff;
+  border: 1px dashed #D2B48C; /* Dashed for handwritten box */
+  border-radius: 4px;
+  font-family: 'Kalam', cursive;
+  font-size: 1.2em; /* Larger font */
+  color: #4A3B31;
+  padding: 0.5rem;
+  width: 80px; /* Fixed width for number */
+  text-align: center;
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.05) inset;
+}
+.notebook-theme .digest-time-label {
+  font-family: 'Kalam', cursive;
+  font-size: 1.1em;
+  color: #795548;
+}
+
+.notebook-theme .generate-digest-button {
+  font-family: 'Caveat', cursive;
+  font-size: 1.5rem; /* Large, inviting button text */
+  padding: 0.75rem 2rem;
+  background: linear-gradient(135deg, #FFB74D, #FFA726); /* Warm orange gradient */
+  color: #fff;
+  border: 2px solid white;
+  border-radius: 30px; /* Pill shape */
+  text-shadow: 1px 1px 1px #A1887F;
+  box-shadow: 0 4px 8px rgba(255,112,67,0.3), 0 0 0 3px #FFF3E0; /* Glow effect */
+  transition: all 0.2s ease-out;
+}
+.notebook-theme .generate-digest-button:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 12px rgba(255,112,67,0.4), 0 0 0 4px #FFF3E0;
+}
+.notebook-theme .generate-digest-button svg { margin-right: 0.75rem; }
+
+
+/* Active Digest Display */
+.notebook-theme .active-digest-card {
+  background-color: rgba(255,253,240,0.9); /* Slightly transparent ivory */
+  border: 1px solid #F0E68C;
+  border-radius: 8px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+  backdrop-filter: blur(3px); /* Frosted glass effect over main bg */
+}
+.notebook-theme .active-digest-header {
+  background: linear-gradient(to right, rgba(255,204,128,0.3), rgba(255,235,156,0.3)); /* Soft peach/yellow gradient */
+  border-bottom: 1px solid #FFD54F; /* Goldenrod separator */
+  padding: 1.5rem;
+}
+.notebook-theme .active-digest-header .card-title-text {
+  font-family: 'Caveat', cursive;
+  font-size: 2em; color: #BF360C; /* Deep orange */
+}
+.notebook-theme .active-digest-header .card-description-text {
+  font-family: 'Architects Daughter', cursive;
+  font-size: 0.95em; color: #E65100; /* Darker orange */
+}
+.notebook-theme .active-digest-summary {
+  font-family: 'Kalam', cursive;
+  font-size: 1rem;
+  color: #5D4037;
+  padding: 1rem;
+  background-color: rgba(255,250,230,0.5); /* Very light inner bg for summary */
+  border-radius: 4px;
+  margin: 0 1.5rem 1rem 1.5rem; /* Inset summary */
+  border-left: 3px solid #FFB74D; /* Orange left accent */
+}
+
+/* Review Topics & Suggested Activities */
+.notebook-theme .digest-section-title {
+  font-family: 'Architects Daughter', cursive;
+  font-size: 1.3em;
+  color: #00695C; /* Teal */
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px dashed #4DB6AC; /* Teal dashed line */
+}
+.notebook-theme .digest-section-title svg { margin-right: 0.5rem; }
+
+.notebook-theme .review-topic-item,
+.notebook-theme .suggested-activity-item {
+  background-color: #fff;
+  border: 1px solid #E0E0E0;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.04);
+  position: relative; /* For "pin" */
+}
+/* Pin pseudo-element for topic/activity items */
+.notebook-theme .review-topic-item::before,
+.notebook-theme .suggested-activity-item::before {
+  content: '📍'; /* Pushpin emoji */
+  position: absolute;
+  top: -5px;
+  left: -8px;
+  font-size: 1.2rem;
+  transform: rotate(-15deg);
+  opacity: 0.8;
+}
+.notebook-theme .review-topic-item .topic-title,
+.notebook-theme .suggested-activity-item .activity-title {
+  font-family: 'Kalam', cursive;
+  font-weight: bold; color: #4A3B31;
+}
+.notebook-theme .review-topic-item .topic-reason,
+.notebook-theme .suggested-activity-item .activity-details {
+  font-size: 0.85em; color: #795548; font-style: italic;
+}
+.notebook-theme .suggested-activity-item .activity-duration {
+  font-size: 0.8em; color: #00796B; /* Teal for duration */
+  font-family: 'Patrick Hand', cursive;
+}
+.notebook-theme .suggested-activity-item .activity-toggle-button {
+  border-radius: 50%; height: 2rem; width: 2rem; padding:0;
+  border: 1px solid;
+}
+.notebook-theme .suggested-activity-item .activity-toggle-button.pending {
+  background-color: #FFF9C4; border-color: #FFECB3; color: #F9A825;
+}
+.notebook-theme .suggested-activity-item .activity-toggle-button.done {
+  background-color: #C8E6C9; border-color: #A5D6A7; color: #388E3C;
+}
+
+/* Progress Bar for Digest */
+.notebook-theme .digest-progress-bar .progress-bar-notebook {
+  background-color: #FFE0B2; /* Light orange track */
+  height: 0.75rem !important; /* Thicker bar */
+  border-radius: 10px;
+}
+.notebook-theme .digest-progress-bar .progress-bar-notebook > div {
+  background: linear-gradient(to right, #FFB74D, #FF9800); /* Orange gradient fill */
+  border-radius: 10px;
+}
+
+/* "Mark Day Complete" Button */
+.notebook-theme .complete-digest-button {
+  font-family: 'Caveat', cursive;
+  font-size: 1.2rem;
+  background-color: #AED581; /* Calming Green */
+  color: white;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 0 0 3px #DCEDC8;
+}
+.notebook-theme .complete-digest-button:disabled {
+  background-color: #E0E0E0; color: #9E9E9E; box-shadow: none;
+}
+
+/* Past Digests */
+.notebook-theme .past-digests-card { /* Similar to wellness history card */
+  background-color: #FAF5EF;
+  border: 1px solid #EAE0D6;
+  border-radius: 8px;
+}
+.notebook-theme .past-digest-item {
+  background-color: #FFFDF5;
+  border: 1px solid #F0E6DD;
+  border-left: 4px solid #FFD54F; /* Gold accent for past */
+}
+
+/* Study Stats - similar to wellness resources */
+.notebook-theme .digest-stats-card .resource-item-card { /* Reusing resource card for stats */
+  background-color: #fff; border: 1px solid #D7CCC8; transform: none;
+}
+.notebook-theme .digest-stats-card .resource-item-card:hover {
+  transform: none; box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
+}
+.notebook-theme .digest-stats-card .resource-icon-bg { background-color: #F5F5F5; }
+.notebook-theme .digest-stats-card .stat-value { font-family: 'Caveat', cursive; font-size: 1.8em; color: #5D4037; }
+.notebook-theme .digest-stats-card .stat-title { font-family: 'Architects Daughter', cursive; font-size: 0.9em; color: #795548; }
+
+/* === Artistic Scrapbook/Journal Notebook Theme for BookmarksTab === */
+
+.notebook-theme .bookmarkstab-container {
+  background-color: #FDF5E6; /* Warm parchment */
+  font-family: 'Patrick Hand', cursive;
+  color: #4A3B31; /* Sepia text */
+  padding: 1.5rem;
+  border: 1px solid #D2B48C; /* Tan border */
+  /* Old book cover effect */
+  box-shadow: 
+    0 0 0 10px #EAE0D6, /* Inner matting */
+    0 0 0 12px #C1A78A, /* Darker "binding" edge */
+    5px 5px 15px 12px rgba(0,0,0,0.2); /* Outer shadow */
+  min-height: 100vh;
+}
+
+/* Header Bar */
+.notebook-theme .bookmarkstab-header-bar {
+  display: flex;
+  flex-direction: column; 
+  gap: 0.75rem;
+  padding-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid transparent; /* Use pseudo for decorative */
+  position: relative;
+  background: linear-gradient(to bottom, rgba(245, 232, 214, 0.5), rgba(245, 232, 214, 0)); /* Faded top */
+}
+.notebook-theme .bookmarkstab-header-bar::after { /* Decorative flourish/border */
+  content: '❦'; /* Floral heart character */
+  display: block;
+  text-align: center;
+  font-size: 1.8rem;
+  color: #BCAAA4; /* Muted flourish color */
+  margin-top: 0.5rem;
+}
+@media (min-width: 768px) { /* md breakpoint */
+  .notebook-theme .bookmarkstab-header-bar {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.notebook-theme .bookmarkstab-title-group { display: flex; align-items: center; }
+.notebook-theme .bookmarkstab-title-icon-bg {
+  background: #C5CAE9; /* Lavender/Vintage Blue */
+  border: 2px dotted #9FA8DA; /* Dotted border for "stitched patch" look */
+  padding: 0.75rem;
+  margin-right: 1rem;
+  border-radius: 8px; /* Soft square */
+  transform: rotate(-3deg); /* Slightly tilted */
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+}
+.notebook-theme .bookmarkstab-title-icon-bg svg { height: 1.75rem; width: 1.75rem; color: #3F51B5; /* Indigo */ }
+
+.notebook-theme .bookmarkstab-title {
+  font-family: 'Dancing Script', cursive; /* Elegant script font */
+  color: #5D4037; /* Earthy Brown */
+  font-size: 2.6rem;
+  text-shadow: 1px 1px 0px #FFFDE7; /* Light cream shadow */
+}
+.notebook-theme .bookmarkstab-description {
+  font-family: 'Architects Daughter', cursive;
+  color: #A1887F; /* Muted Sepia */
+  font-size: 1rem;
+  margin-top: 0.15rem;
+}
+
+.notebook-theme .bookmarkstab-header-controls .notetab-header-button {
+  background-color: rgba(255,253,240,0.7); /* Ivory, slightly transparent */
+  border: 1px solid #F0E68C; /* Khaki border */
+  color: #795548;
+  border-radius: 50%; height: 2.75rem; width: 2.75rem; /* Round buttons */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.notebook-theme .bookmarkstab-header-controls .notetab-header-button.active-theme-button {
+  background-color: #FFD54F; border-color: #FFB300; color: #4E342E; /* Gold/Amber */
+}
+
+/* Search and Filter Area */
+.notebook-theme .bookmarks-controls-area {
+  background-color: rgba(239, 235, 233, 0.5); /* Semi-transparent overlay for controls */
+  padding: 1rem;
+  border-radius: 6px;
+  border: 1px dashed #D2B48C;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.notebook-theme .bookmarks-search-input {
+  font-family: 'Kalam', cursive;
+  background-color: #fff;
+  border: 1px solid #E0D8CD; /* Softer border */
+  border-radius: 20px; /* Pill shape input */
+  padding-left: 2.75rem; /* More space for icon */
+  color: #5D4037;
+}
+.notebook-theme .bookmarks-search-input-icon { color: #A1887F; left: 1rem; }
+
+.notebook-theme .bookmarks-category-button {
+  font-family: 'Patrick Hand', cursive;
+  background-color: #FFE0B2; /* Light orange */
+  color: #A1887F; /* Muted brown */
+  border: 1px solid #FFCC80;
+  border-radius: 4px; /* Rectangular label */
+  padding: 0.3rem 0.8rem;
+  font-size: 0.9em;
+  box-shadow: 1px 1px 0px #FFDAB9; /* Slight 3D effect */
+}
+.notebook-theme .bookmarks-category-button.active {
+  background-color: #FFB74D; /* Darker orange */
+  color: #4E342E; /* Darker text */
+  border-color: #FFA726;
+  box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1);
+}
+.notebook-theme .bookmarks-viewmode-toggle button { /* For grid/list view toggles */
+  background-color: #F5E8DD; border: 1px solid #D2B48C; color: #795548;
+}
+.notebook-theme .bookmarks-viewmode-toggle button.active {
+  background-color: #D2B48C; color: white;
+}
+
+
+/* Bookmark Item Styling (Grid and List) - Scrapbook elements */
+.notebook-theme .bookmark-item-card { /* Base for both grid/list */
+  font-family: 'Kalam', cursive;
+  color: #4A3B31;
+  border-radius: 4px;
+  transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative; /* For pseudo-elements like pins/tape */
+  overflow: visible; /* Allow elements to peek out */
+}
+.notebook-theme .bookmark-item-card:hover {
+  transform: translateY(-4px) rotate(0.5deg) scale(1.01);
+  box-shadow: 5px 7px 15px rgba(0,0,0,0.15);
+}
+
+.notebook-theme .bookmark-item-grid {
+  background-color: #FFF9E6; /* Light yellow paper */
+  border: 1px solid #FFECB3; /* Pale yellow border */
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.07);
+  padding: 1rem;
+}
+/* "Photo Corner" effect for grid items */
+.notebook-theme .bookmark-item-grid::before,
+.notebook-theme .bookmark-item-grid::after {
+  content: '';
+  position: absolute;
+  width: 25px; height: 25px;
+  background-color: #D2B48C; /* Tan color for corners */
+  opacity: 0.6;
+}
+.notebook-theme .bookmark-item-grid::before { top: -5px; left: -5px; transform: rotate(-45deg); clip-path: polygon(0 0, 100% 0, 0 100%);}
+.notebook-theme .bookmark-item-grid::after { bottom: -5px; right: -5px; transform: rotate(135deg); clip-path: polygon(0 0, 100% 0, 0 100%); }
+
+.notebook-theme .bookmark-item-grid .bookmark-item-title {
+  font-family: 'Architects Daughter', cursive;
+  font-weight: bold;
+  font-size: 1.1em;
+  color: #795548; /* Brown */
+  border-bottom: 1px dashed #FFDCC8; /* Peach dashed line */
+  padding-bottom: 0.3rem;
+  margin-bottom: 0.5rem;
+}
+.notebook-theme .bookmark-item-grid .bookmark-item-content-preview {
+  font-size: 0.9em; color: #8D6E63;
+}
+.notebook-theme .bookmark-item-grid .bookmark-item-comment {
+  background-color: rgba(225, 245, 254, 0.5); /* Light blue semi-transparent sticky note */
+  border: 1px dashed #81D4FA;
+  padding: 0.3rem 0.5rem; margin-top: 0.5rem; border-radius: 3px;
+  font-size: 0.8em; font-style: italic;
+}
+.notebook-theme .bookmark-item-grid .bookmark-item-tags .bookmark-tag-badge {
+  background-color: #D1C4E9; color: #4527A0; border: 1px solid #B39DDB; /* Lavender tags */
+  font-family: 'Architects Daughter', cursive; font-size: 0.7em; padding: 2px 5px;
+}
+
+.notebook-theme .bookmark-item-list {
+  background-color: #fff; /* White paper strip */
+  border: 1px solid #EAE0D6;
+  padding: 0.75rem 1rem;
+  /* "Ribbon" edge */
+  border-left: 8px solid #FFAB91; /* Coral ribbon color */
+  box-shadow: 2px 0 3px -1px rgba(255,171,145,0.5) inset; /* Inner shadow for ribbon */
+}
+.notebook-theme .bookmark-item-list .bookmark-item-title {
+  font-family: 'Caveat', cursive;
+  font-size: 1.3em;
+  color: #BF360C; /* Burnt orange */
+}
+
+/* Empty State for Bookmarks */
+.notebook-theme .bookmarks-empty-state {
+  background-color: rgba(245, 232, 214, 0.3); /* Transparent parchment */
+  border: 2px dashed #D2B48C;
+  padding: 3rem 2rem; text-align: center; border-radius: 8px;
+}
+.notebook-theme .bookmarks-empty-state svg { color: #A1887F; margin-bottom: 1rem; }
+.notebook-theme .bookmarks-empty-state h3 {
+  font-family: 'Caveat', cursive; font-size: 1.8em; color: #795548;
+}
+
+/* Modal styling for viewing/editing bookmark - reuse .dialog-content-notebook */
+.notebook-theme .bookmark-view-modal .dialog-title-notebook {
+  font-family: 'Dancing Script', cursive; font-size: 2.2em; color: #5D4037;
+}
+.notebook-theme .bookmark-view-modal .note-content-display {
+  background-color: #fff;
+  padding: 1rem;
+  border-radius: 4px;
+  border: 1px solid #F0E68C; /* Khaki border */
+  font-family: 'Kalam', cursive;
+  line-height: 1.6em;
+  max-height: 30vh; overflow-y: auto;
+  background-image: linear-gradient(to bottom, transparent 1em, #F5F5F5 1em, #F5F5F5 1.05em, transparent 1.05em);
+  background-size: 100% 1.6em;
+}
+.notebook-theme .bookmark-view-modal .comment-section-notebook .comment-display {
+  background-color: #FFF9C4; /* Yellow sticky note for comment */
+  border: 1px dashed #FFECB3;
+  padding: 0.75rem; border-radius: 3px; font-style: italic;
+}
+.notebook-theme .bookmark-view-modal .comment-section-notebook textarea {
+  /* Use .studyplan-modal-textarea style */
+}
+.notebook-theme .bookmark-view-modal .comment-section-notebook button {
+  /* Use .dialog-button-notebook.primary or .outline */
 }

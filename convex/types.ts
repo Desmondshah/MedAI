@@ -11,6 +11,7 @@ export interface Note {
 }
 
 export interface Flashcard {
+  _creationTime: any;
   _id: Id<"flashcards">;
   userId: Id<"users">;
   front: string;
@@ -21,6 +22,7 @@ export interface Flashcard {
 }
 
 export interface QuizQuestion {
+  explanation: any;
   question: string;
   options: string[];
   correctAnswer: number;
