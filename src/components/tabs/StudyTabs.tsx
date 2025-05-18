@@ -10,40 +10,48 @@ import {
   Brain, Sparkles, CheckCircle2, ListTodo, Target, ChevronDown, ChevronUp,
   Sun, Moon, Loader2, RotateCcw, AlertCircle, Info, TrendingUp, ClipboardCheck,
   Play, Eye, Edit3, Trash2, CalendarCheck2, ListChecks, Target as TargetIcon, Award, Settings2,
-  Palette, 
-  Calendar as CalendarIcon, 
-  Clock as ClockIcon,       
-  ArrowLeft, // Added for QuizTab back button
-  Save, // Added for FlashcardsTab save button
+  Palette,
+  Calendar as CalendarIcon,
+  Clock as ClockIcon,
+  ArrowLeft,
+  Save,
   Zap,
   ChevronRight,
   Plus,
-  X, // Added for FlashcardsTab generate button
+  X,
 } from "lucide-react";
 import {
   Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter,
-} from "../../components/ui/card"; 
+} from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Textarea } from "../../components/ui/textarea";
 import { Progress } from "../../components/ui/progress";
-import StudyCard from "../ui/StudyCard"; 
+import StudyCard from "../ui/StudyCard";
 import { Badge } from "../../components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
-// Ensure all types are correctly imported from your central types file
-import { Flashcard as FlashcardType, Quiz as QuizType, QuizQuestion } from "../../../convex/types"; 
+import { Flashcard as FlashcardType, Quiz as QuizType, QuizQuestion } from "../../../convex/types";
 
 interface UserAwareProps {
   userId: Id<"users">;
 }
 
-interface ProgressItem { 
-    _id?: Id<"progress">; 
+interface ProgressItem {
+    _id?: Id<"progress">;
     userId: Id<"users">;
     topic: string;
     confidence: number;
     lastReviewed: number;
     createdAt?: number;
+}
+
+// Added for Spaced Repetition
+interface SpacedRepetitionItem {
+  id: string; // Or remove if not needed from AI
+  prompt: string;
+  answer: string;
+  topic: string;
+  itemType?: "recall" | "definition" | "fill-in-blank";
 }
 
 const formatDate = (timestamp: number | Date | undefined, options?: Intl.DateTimeFormatOptions): string => {
@@ -54,19 +62,11 @@ const formatDate = (timestamp: number | Date | undefined, options?: Intl.DateTim
     return new Date(timestamp).toLocaleDateString(undefined, options || defaultOptions);
 };
 
-const formatDuration = (minutes: number): string => {
-    if (minutes < 1) return "<1 min";
-    if (minutes < 60) return `${minutes} min`;
-    const hours = Math.floor(minutes / 60);
-    const remMinutes = minutes % 60;
-    return `${hours}h${remMinutes > 0 ? ` ${remMinutes}m` : ''}`;
-};
-
 // --- FlashcardsTab Component ---
 interface FlashcardSet {
   id: string;
   title: string;
-  cards: FlashcardType[]; 
+  cards: FlashcardType[];
   source?: string;
   createdAt?: number;
 }
@@ -78,7 +78,7 @@ export function FlashcardsTab({ userId }: UserAwareProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [reviewingSet, setReviewingSet] = useState<FlashcardSet | null>(null);
   const [currentCardIndex, setCurrentCardIndex] = useState<number>(0);
-  
+
   const [error, setError] = useState<string | null>(null);
   const [darkMode, setDarkMode] = useState<boolean>(false);
   const [useNotebookTheme, setUseNotebookTheme] = useState<boolean>(false);
@@ -116,7 +116,7 @@ export function FlashcardsTab({ userId }: UserAwareProps) {
     try {
       const response = await generateFlashcardsAction({ topic: topic.trim(), content: content.trim() || undefined });
       if (response && response.length > 0) {
-        setGeneratedFlashcards(response as FlashcardType[]); 
+        setGeneratedFlashcards(response as FlashcardType[]);
         toast.success(`${response.length} flashcards generated!`);
       } else {
         setError("No flashcards generated. Try refining your input.");
@@ -127,7 +127,7 @@ export function FlashcardsTab({ userId }: UserAwareProps) {
       setError(`Generation failed: ${msg}`); toast.error(`Generation failed: ${msg}`);
     } finally { setIsLoading(false); }
   };
-  
+
   const handleSaveGeneratedCards = async () => {
     if (generatedFlashcards.length === 0) return;
     setIsLoading(true);
@@ -172,7 +172,7 @@ export function FlashcardsTab({ userId }: UserAwareProps) {
                 toast.info(`Card marked with confidence: ${confidence}/5`);
             } catch(err) { toast.error("Failed to update confidence."); }
         }
-        handleNextCard(); 
+        handleNextCard();
     }
   };
 
@@ -183,36 +183,37 @@ export function FlashcardsTab({ userId }: UserAwareProps) {
     return (
       <div className={`study-tab-pane-container flashcards-review-area ${rootThemeClass}`}>
          <div className={`
-            flex justify-between items-center mb-6 
+            flex justify-between items-center mb-6
             ${useNotebookTheme ? 'study-tab-header-bar !border-none !mb-4' : (darkMode ? 'border-b border-neutral-700 pb-4' : 'border-b border-gray-200 pb-4')}
           `}>
-            <Button 
-              variant="outline" 
-              onClick={() => setReviewingSet(null)} 
-              className={`${useNotebookTheme 
-                ? 'study-action-button !bg-amber-50 !text-amber-700 !border-amber-300' 
+            <Button
+              variant="outline"
+              onClick={() => setReviewingSet(null)}
+              className={`${useNotebookTheme
+                ? 'study-action-button !bg-amber-50 !text-amber-700 !border-amber-300'
                 : (darkMode ? 'border-neutral-600 hover:bg-neutral-700' : 'border-gray-300 hover:bg-gray-50')
               }`}
             >
                 <ArrowLeft className="h-4 w-4 mr-2" /> Back to Decks
             </Button>
-            {/* You can add theme toggles here as well if desired for the review screen */}
             <div className={`flex items-center gap-2 ${useNotebookTheme ? 'study-tab-header-controls' : ''}`}>
               <Button variant="outline" size="icon" onClick={() => setUseNotebookTheme(!useNotebookTheme)} className={`notetab-header-button ${useNotebookTheme ? 'active-theme-button' : ''} ${darkMode && !useNotebookTheme ? 'bg-neutral-800 border-neutral-700 hover:bg-neutral-700' : 'bg-white border-gray-200 hover:bg-gray-100'}`} title="Toggle Notebook Theme"><Palette className="h-5 w-5"/></Button>
-              <Button variant="outline" size="icon" onClick={() => {if (!useNotebookTheme) setDarkMode(!darkMode); else toast.info("Dark mode not for notebook theme.");}} className="notetab-header-button" title="Toggle Dark Mode">{darkMode && !useNotebookTheme ? <Sun className="h-5 w-5"/> : <Moon className="h-5 w-5"/>}</Button>
+              <Button variant="outline" size="icon" onClick={() => {if (!useNotebookTheme) setDarkMode(!darkMode); else toast.info("Dark mode not for notebook theme.");}} className={`notetab-header-button ${darkMode && !useNotebookTheme ? 'bg-neutral-800 border-neutral-700 hover:bg-neutral-700 text-neutral-300' : 'bg-white border-gray-200 hover:bg-gray-100 text-gray-700'}`} title="Toggle Dark Mode">{darkMode && !useNotebookTheme ? <Sun className="h-5 w-5"/> : <Moon className="h-5 w-5"/>}</Button>
             </div>
          </div>
-        <div className={useNotebookTheme ? "study-card-container" : ""}>
+        <div className={useNotebookTheme ? "study-card-container" : ""}> {/* Add class for notebook theme StudyCard container */}
             <StudyCard
-            id={currentCard._id?.toString() || `temp-${currentCardIndex}`}
-            front={currentCard.front}
-            back={currentCard.back}
-            topic={reviewingSet.title}
-            onNext={handleNextCard}
-            onPrevious={handlePreviousCard}
-            onMark={handleMarkConfidence}
-            hasNext={currentCardIndex < reviewingSet.cards.length - 1}
-            hasPrevious={currentCardIndex > 0}
+              id={currentCard._id?.toString() || `temp-${currentCardIndex}`}
+              front={currentCard.front}
+              back={currentCard.back}
+              topic={reviewingSet.title}
+              onNext={handleNextCard}
+              onPrevious={handlePreviousCard}
+              onMark={handleMarkConfidence}
+              hasNext={currentCardIndex < reviewingSet.cards.length - 1}
+              hasPrevious={currentCardIndex > 0}
+              // Pass theme prop if StudyCard supports it
+              // theme={useNotebookTheme ? 'notebook' : 'default'}
             />
         </div>
       </div>
@@ -223,16 +224,16 @@ export function FlashcardsTab({ userId }: UserAwareProps) {
     <div className={`study-tab-pane-container ${rootThemeClass}`}>
       <div className={`
         flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 pb-4 mb-6
-        ${useNotebookTheme 
-          ? 'study-tab-header-bar' 
+        ${useNotebookTheme
+          ? 'study-tab-header-bar'
           : (darkMode ? 'border-b border-neutral-700' : 'border-b border-gray-200')
         }
       `}>
         <div className={`flex items-center ${useNotebookTheme ? 'study-tab-title-group' : ''}`}>
           <div className={`
             p-2.5 mr-3 rounded-xl shadow-md
-            ${useNotebookTheme 
-              ? 'study-tab-title-icon flashcard-tab-icon-bg' 
+            ${useNotebookTheme
+              ? 'study-tab-title-icon flashcard-tab-icon-bg'
               : (darkMode ? 'bg-purple-700' : 'bg-purple-600')
             }
           `}>
@@ -241,22 +242,22 @@ export function FlashcardsTab({ userId }: UserAwareProps) {
           <div>
             <h1 className={`
               tracking-tight
-              ${useNotebookTheme 
-                ? 'study-tab-title' 
+              ${useNotebookTheme
+                ? 'study-tab-title'
                 : `text-3xl font-bold ${darkMode ? 'text-neutral-100' : 'text-gray-900'}`
               }
             `}>Flashcards</h1>
             <p className={`
-              ${useNotebookTheme 
-                ? 'study-tab-description' 
+              ${useNotebookTheme
+                ? 'study-tab-description'
                 : `text-sm ${darkMode ? 'text-neutral-400' : 'text-gray-500'}`
               }
             `}>Create, review, and master medical concepts.</p>
           </div>
         </div>
         <div className={`flex items-center gap-2 ${useNotebookTheme ? 'study-tab-header-controls' : ''}`}>
-            <Button variant="outline" size="icon" onClick={() => setUseNotebookTheme(!useNotebookTheme)} className={`notetab-header-button ${useNotebookTheme ? 'active-theme-button' : ''} ${darkMode && !useNotebookTheme ? 'bg-neutral-800 border-neutral-700 hover:bg-neutral-700' : 'bg-white border-gray-200 hover:bg-gray-100'}`} title="Toggle Notebook Theme"><Palette className="h-5 w-5"/></Button>
-            <Button variant="outline" size="icon" onClick={() => {if (!useNotebookTheme) setDarkMode(!darkMode); else toast.info("Dark mode not applicable to Notebook theme.");}} className="notetab-header-button" title="Toggle Dark Mode">{darkMode && !useNotebookTheme ? <Sun className="h-5 w-5"/> : <Moon className="h-5 w-5"/>}</Button>
+            <Button variant="outline" size="icon" onClick={() => setUseNotebookTheme(!useNotebookTheme)} className={`notetab-header-button ${useNotebookTheme ? 'active-theme-button' : ''} ${darkMode && !useNotebookTheme ? 'bg-neutral-800 border-neutral-700 hover:bg-neutral-700 text-neutral-300' : 'bg-white border-gray-200 hover:bg-gray-100 text-gray-700'}`} title="Toggle Notebook Theme"><Palette className="h-5 w-5"/></Button>
+            <Button variant="outline" size="icon" onClick={() => {if (!useNotebookTheme) setDarkMode(!darkMode); else toast.info("Dark mode not applicable to Notebook theme.");}} className={`notetab-header-button ${darkMode && !useNotebookTheme ? 'bg-neutral-800 border-neutral-700 hover:bg-neutral-700 text-neutral-300' : 'bg-white border-gray-200 hover:bg-gray-100 text-gray-700'}`} title="Toggle Dark Mode">{darkMode && !useNotebookTheme ? <Sun className="h-5 w-5"/> : <Moon className="h-5 w-5"/>}</Button>
         </div>
       </div>
 
@@ -273,7 +274,7 @@ export function FlashcardsTab({ userId }: UserAwareProps) {
           <Textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="Optional: Paste content here..." className={`study-input-notebook min-h-[100px]`}/>
           {error && <p className="text-xs text-red-500 flex items-center gap-1.5"><AlertCircle className="h-4 w-4"/>{error}</p>}
           <div className="flex justify-end">
-            <Button onClick={handleGenerateFlashcards} disabled={isLoading || !topic.trim()} className={`study-action-button primary`}>
+            <Button onClick={handleGenerateFlashcards} disabled={isLoading || !topic.trim()} className={`study-action-button primary ${useNotebookTheme ? '' : ''}`}>
               {isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin"/> : <Zap className="h-4 w-4 mr-2" />}
               Generate with AI
             </Button>
@@ -286,10 +287,10 @@ export function FlashcardsTab({ userId }: UserAwareProps) {
             <div className="flex justify-between items-center">
                 <h2 className={`text-xl font-semibold ${useNotebookTheme ? 'text-amber-800' : (darkMode ? 'text-neutral-100' : 'text-gray-800')}`}>Generated Cards for "{topic}"</h2>
                 <div className="flex gap-2">
-                    <Button variant="outline" onClick={() => startReview({id: 'generated', title: `Review: ${topic}`, cards: generatedFlashcards, source: 'Generated'})} className={`study-action-button`}>
+                    <Button variant="outline" onClick={() => startReview({id: 'generated', title: `Review: ${topic}`, cards: generatedFlashcards, source: 'Generated'})} className={`study-action-button ${useNotebookTheme ? '' : ''}`}>
                         <Play className="h-4 w-4 mr-2"/> Review These
                     </Button>
-                    <Button onClick={handleSaveGeneratedCards} className={`study-action-button primary`}>
+                    <Button onClick={handleSaveGeneratedCards} className={`study-action-button primary ${useNotebookTheme ? '' : ''}`}>
                         <Save className="h-4 w-4 mr-2"/> Save to My Decks
                     </Button>
                 </div>
@@ -318,7 +319,7 @@ export function FlashcardsTab({ userId }: UserAwareProps) {
             <motion.div
                 key={deck.id}
                 initial={{ opacity: 0, y:20 }} animate={{ opacity: 1, y:0 }} transition={{delay: 0.1 * savedDecks.indexOf(deck)}}
-                className={`rounded-xl shadow-lg overflow-hidden cursor-pointer group transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 flashcard-deck-card 
+                className={`rounded-xl shadow-lg overflow-hidden cursor-pointer group transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 flashcard-deck-card
                             ${useNotebookTheme ? '' : (darkMode ? 'bg-neutral-800 border-neutral-700 hover:border-purple-600' : 'bg-white border-gray-200 hover:border-purple-400')}`}
                 onClick={() => startReview(deck)}
             >
@@ -362,7 +363,7 @@ export function QuizzesTab({ userId }: UserAwareProps) {
   const createQuizMutation = useMutation(api.quizzes.create);
   const updateQuizScoreMutation = useMutation(api.quizzes.updateScore);
   const pastQuizzesQuery = useQuery(api.quizzes.getAll, { userId });
-  
+
   const [pastQuizzes, setPastQuizzes] = useState<QuizType[]>([]);
 
   useEffect(() => {
@@ -372,7 +373,6 @@ export function QuizzesTab({ userId }: UserAwareProps) {
 
   useEffect(() => {
     if (pastQuizzesQuery) {
-        // Ensure correct mapping if types differ slightly, as done in the fix for the error
         const mappedQuizzes: QuizType[] = pastQuizzesQuery
             .map(dbQuiz => ({
                 _id: dbQuiz._id,
@@ -382,7 +382,7 @@ export function QuizzesTab({ userId }: UserAwareProps) {
                     question: q.question,
                     options: q.options,
                     correctAnswer: q.correctAnswer,
-                    explanation: q.explanation ?? "", 
+                    explanation: q.explanation ?? "",
                 })),
                 score: dbQuiz.score,
                 takenAt: dbQuiz.takenAt,
@@ -451,7 +451,7 @@ export function QuizzesTab({ userId }: UserAwareProps) {
     setCurrentQuiz(null); setTopic(""); setDifficulty("medium"); setQuestionCount(5);
     setIsQuizComplete(false); setError(null);
   };
-  
+
   const rootThemeClass = useNotebookTheme ? 'notebook-theme' : (darkMode ? 'dark' : '');
 
   if (quizInProgress && currentQuiz) {
@@ -459,22 +459,22 @@ export function QuizzesTab({ userId }: UserAwareProps) {
     return (
         <div className={`study-tab-pane-container ${rootThemeClass}`}>
             <div className={`
-              flex justify-between items-center mb-6 
+              flex justify-between items-center mb-6
               ${useNotebookTheme ? 'study-tab-header-bar !border-none !mb-4' : (darkMode ? 'border-b border-neutral-700 pb-4' : 'border-b border-gray-200 pb-4')}
             `}>
-                 <Button 
-                    variant="outline" 
-                    onClick={() => {setQuizInProgress(false);}} 
-                    className={`${useNotebookTheme 
-                      ? 'study-action-button !bg-amber-50 !text-amber-700 !border-amber-300' 
+                 <Button
+                    variant="outline"
+                    onClick={() => {setQuizInProgress(false);}}
+                    className={`${useNotebookTheme
+                      ? 'study-action-button !bg-amber-50 !text-amber-700 !border-amber-300'
                       : (darkMode ? 'border-neutral-600 hover:bg-neutral-700' : 'border-gray-300 hover:bg-gray-50')
                     }`}
                   >
                     <ArrowLeft className="h-4 w-4 mr-2" /> Back to Quiz Setup
                 </Button>
                 <div className={`flex items-center gap-2 ${useNotebookTheme ? 'study-tab-header-controls' : ''}`}>
-                    <Button variant="outline" size="icon" onClick={() => setUseNotebookTheme(!useNotebookTheme)} className={`notetab-header-button ${useNotebookTheme ? 'active-theme-button' : ''}`} title="Toggle Notebook Theme"><Palette className="h-5 w-5"/></Button>
-                    <Button variant="outline" size="icon" onClick={() => {if (!useNotebookTheme) setDarkMode(!darkMode); else toast.info("Dark mode not for notebook theme.");}} className="notetab-header-button" title="Toggle Dark Mode">{darkMode && !useNotebookTheme ? <Sun className="h-5 w-5"/> : <Moon className="h-5 w-5"/>}</Button>
+                    <Button variant="outline" size="icon" onClick={() => setUseNotebookTheme(!useNotebookTheme)} className={`notetab-header-button ${useNotebookTheme ? 'active-theme-button' : ''} ${darkMode && !useNotebookTheme ? 'bg-neutral-800 border-neutral-700 hover:bg-neutral-700 text-neutral-300' : 'bg-white border-gray-200 hover:bg-gray-100 text-gray-700'}`} title="Toggle Notebook Theme"><Palette className="h-5 w-5"/></Button>
+                    <Button variant="outline" size="icon" onClick={() => {if (!useNotebookTheme) setDarkMode(!darkMode); else toast.info("Dark mode not applicable to Notebook theme.");}} className={`notetab-header-button ${darkMode && !useNotebookTheme ? 'bg-neutral-800 border-neutral-700 hover:bg-neutral-700 text-neutral-300' : 'bg-white border-gray-200 hover:bg-gray-100 text-gray-700'}`} title="Toggle Dark Mode">{darkMode && !useNotebookTheme ? <Sun className="h-5 w-5"/> : <Moon className="h-5 w-5"/>}</Button>
                 </div>
             </div>
             <Card className={`study-card-notebook ${useNotebookTheme ? '' : (darkMode ? 'bg-neutral-800' : 'bg-white')}`}>
@@ -495,7 +495,7 @@ export function QuizzesTab({ userId }: UserAwareProps) {
                             key={index}
                             variant={userAnswers[currentQuestionIndex] === index ? "default" : "outline"}
                             className={`w-full justify-start text-left h-auto py-3 px-4 rounded-lg transition-all duration-150 quiz-option-button ${userAnswers[currentQuestionIndex] === index ? 'selected' : ''}
-                                        ${useNotebookTheme ? '' : (userAnswers[currentQuestionIndex] === index 
+                                        ${useNotebookTheme ? '' : (userAnswers[currentQuestionIndex] === index
                                             ? (darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')
                                             : (darkMode ? 'bg-neutral-700 border-neutral-600 hover:bg-neutral-600 text-neutral-300' : 'bg-white border-gray-300 hover:bg-gray-100 text-gray-700'))
                                         }`}
@@ -510,7 +510,7 @@ export function QuizzesTab({ userId }: UserAwareProps) {
                     </div>
                 </CardContent>
                 <CardFooter className={`study-card-footer-notebook`}>
-                    <Button onClick={handleNextQuestion} disabled={userAnswers[currentQuestionIndex] === null} className="w-full rounded-lg shadow-md study-action-button primary">
+                    <Button onClick={handleNextQuestion} disabled={userAnswers[currentQuestionIndex] === null} className={`w-full rounded-lg shadow-md study-action-button primary ${useNotebookTheme ? '' : ''}`}>
                         {currentQuestionIndex < currentQuiz.questions.length - 1 ? "Next Question" : "Finish Quiz"}
                         <ChevronRight className="h-4 w-4 ml-2"/>
                     </Button>
@@ -525,8 +525,8 @@ export function QuizzesTab({ userId }: UserAwareProps) {
         <div className={`study-tab-pane-container ${rootThemeClass}`}>
              <div className={`flex justify-end items-center mb-6 ${useNotebookTheme ? 'study-tab-header-bar !border-none !mb-4' : ''}`}>
                 <div className={`flex items-center gap-2 ${useNotebookTheme ? 'study-tab-header-controls' : ''}`}>
-                    <Button variant="outline" size="icon" onClick={() => setUseNotebookTheme(!useNotebookTheme)} className={`notetab-header-button ${useNotebookTheme ? 'active-theme-button' : ''}`} title="Toggle Notebook Theme"><Palette className="h-5 w-5"/></Button>
-                    <Button variant="outline" size="icon" onClick={() => {if (!useNotebookTheme) setDarkMode(!darkMode); else toast.info("Dark mode not for notebook theme.");}} className="notetab-header-button" title="Toggle Dark Mode">{darkMode && !useNotebookTheme ? <Sun className="h-5 w-5"/> : <Moon className="h-5 w-5"/>}</Button>
+                    <Button variant="outline" size="icon" onClick={() => setUseNotebookTheme(!useNotebookTheme)} className={`notetab-header-button ${useNotebookTheme ? 'active-theme-button' : ''} ${darkMode && !useNotebookTheme ? 'bg-neutral-800 border-neutral-700 hover:bg-neutral-700 text-neutral-300' : 'bg-white border-gray-200 hover:bg-gray-100 text-gray-700'}`} title="Toggle Notebook Theme"><Palette className="h-5 w-5"/></Button>
+                    <Button variant="outline" size="icon" onClick={() => {if (!useNotebookTheme) setDarkMode(!darkMode); else toast.info("Dark mode not applicable to Notebook theme.");}} className={`notetab-header-button ${darkMode && !useNotebookTheme ? 'bg-neutral-800 border-neutral-700 hover:bg-neutral-700 text-neutral-300' : 'bg-white border-gray-200 hover:bg-gray-100 text-gray-700'}`} title="Toggle Dark Mode">{darkMode && !useNotebookTheme ? <Sun className="h-5 w-5"/> : <Moon className="h-5 w-5"/>}</Button>
                 </div>
              </div>
             <Card className={`study-card-notebook ${useNotebookTheme ? '' : (darkMode ? 'bg-neutral-800' : 'bg-white')}`}>
@@ -550,10 +550,10 @@ export function QuizzesTab({ userId }: UserAwareProps) {
                     ))}
                 </CardContent>
                  <CardFooter className={`study-card-footer-notebook flex-col sm:flex-row justify-between gap-2`}>
-                    <Button variant="outline" onClick={() => startQuiz()} className="w-full sm:w-auto rounded-lg study-action-button">
+                    <Button variant="outline" onClick={() => startQuiz()} className={`w-full sm:w-auto rounded-lg study-action-button ${useNotebookTheme ? '' : ''}`}>
                         <RotateCcw className="h-4 w-4 mr-2"/> Retry Quiz
                     </Button>
-                    <Button onClick={resetQuizGenerator} className="w-full sm:w-auto rounded-lg study-action-button primary">
+                    <Button onClick={resetQuizGenerator} className={`w-full sm:w-auto rounded-lg study-action-button primary ${useNotebookTheme ? '' : ''}`}>
                         <Plus className="h-4 w-4 mr-2"/> Create New Quiz
                     </Button>
                 </CardFooter>
@@ -566,16 +566,16 @@ export function QuizzesTab({ userId }: UserAwareProps) {
     <div className={`study-tab-pane-container ${rootThemeClass}`}>
       <div className={`
         flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 pb-4 mb-6
-        ${useNotebookTheme 
-          ? 'study-tab-header-bar' 
+        ${useNotebookTheme
+          ? 'study-tab-header-bar'
           : (darkMode ? 'border-b border-neutral-700' : 'border-b border-gray-200')
         }
       `}>
         <div className={`flex items-center ${useNotebookTheme ? 'study-tab-title-group' : ''}`}>
           <div className={`
             p-2.5 mr-3 rounded-xl shadow-md
-            ${useNotebookTheme 
-              ? 'study-tab-title-icon quiz-tab-icon-bg' 
+            ${useNotebookTheme
+              ? 'study-tab-title-icon quiz-tab-icon-bg'
               : (darkMode ? 'bg-teal-700' : 'bg-teal-600')
             }
           `}>
@@ -584,22 +584,22 @@ export function QuizzesTab({ userId }: UserAwareProps) {
           <div>
             <h1 className={`
               tracking-tight
-              ${useNotebookTheme 
-                ? 'study-tab-title' 
+              ${useNotebookTheme
+                ? 'study-tab-title'
                 : `text-3xl font-bold ${darkMode ? 'text-neutral-100' : 'text-gray-900'}`
               }
             `}>Practice Quizzes</h1>
             <p className={`
-              ${useNotebookTheme 
-                ? 'study-tab-description' 
+              ${useNotebookTheme
+                ? 'study-tab-description'
                 : `text-sm ${darkMode ? 'text-neutral-400' : 'text-gray-500'}`
               }
             `}>Test your knowledge with AI-generated quizzes.</p>
           </div>
         </div>
         <div className={`flex items-center gap-2 ${useNotebookTheme ? 'study-tab-header-controls' : ''}`}>
-            <Button variant="outline" size="icon" onClick={() => setUseNotebookTheme(!useNotebookTheme)} className={`notetab-header-button ${useNotebookTheme ? 'active-theme-button' : ''} ${darkMode && !useNotebookTheme ? 'bg-neutral-800 border-neutral-700 hover:bg-neutral-700' : 'bg-white border-gray-200 hover:bg-gray-100'}`} title="Toggle Notebook Theme"><Palette className="h-5 w-5"/></Button>
-            <Button variant="outline" size="icon" onClick={() => {if (!useNotebookTheme) setDarkMode(!darkMode); else toast.info("Dark mode not for notebook theme.");}} className="notetab-header-button" title="Toggle Dark Mode">{darkMode && !useNotebookTheme ? <Sun className="h-5 w-5"/> : <Moon className="h-5 w-5"/>}</Button>
+            <Button variant="outline" size="icon" onClick={() => setUseNotebookTheme(!useNotebookTheme)} className={`notetab-header-button ${useNotebookTheme ? 'active-theme-button' : ''} ${darkMode && !useNotebookTheme ? 'bg-neutral-800 border-neutral-700 hover:bg-neutral-700 text-neutral-300' : 'bg-white border-gray-200 hover:bg-gray-100 text-gray-700'}`} title="Toggle Notebook Theme"><Palette className="h-5 w-5"/></Button>
+            <Button variant="outline" size="icon" onClick={() => {if (!useNotebookTheme) setDarkMode(!darkMode); else toast.info("Dark mode not applicable to Notebook theme.");}} className={`notetab-header-button ${darkMode && !useNotebookTheme ? 'bg-neutral-800 border-neutral-700 hover:bg-neutral-700 text-neutral-300' : 'bg-white border-gray-200 hover:bg-gray-100 text-gray-700'}`} title="Toggle Dark Mode">{darkMode && !useNotebookTheme ? <Sun className="h-5 w-5"/> : <Moon className="h-5 w-5"/>}</Button>
         </div>
       </div>
 
@@ -630,11 +630,11 @@ export function QuizzesTab({ userId }: UserAwareProps) {
           {error && <p className="text-xs text-red-500 flex items-center gap-1.5"><AlertCircle className="h-4 w-4"/>{error}</p>}
           <div className="flex flex-col sm:flex-row justify-end gap-3">
             {currentQuiz && !isGeneratingQuiz && !quizInProgress && (
-                 <Button variant="outline" onClick={() => startQuiz()} className={`study-action-button w-full sm:w-auto`}>
+                 <Button variant="outline" onClick={() => startQuiz()} className={`study-action-button w-full sm:w-auto ${useNotebookTheme ? '' : ''}`}>
                     <Play className="h-4 w-4 mr-2"/> Start Generated Quiz
                 </Button>
             )}
-            <Button onClick={handleGenerateQuiz} disabled={isGeneratingQuiz || !topic.trim()} className={`study-action-button primary w-full sm:w-auto`}>
+            <Button onClick={handleGenerateQuiz} disabled={isGeneratingQuiz || !topic.trim()} className={`study-action-button primary w-full sm:w-auto ${useNotebookTheme ? '' : ''}`}>
               {isGeneratingQuiz ? <Loader2 className="h-4 w-4 mr-2 animate-spin"/> : <Sparkles className="h-4 w-4 mr-2" />}
               {currentQuiz ? "Regenerate Quiz" : "Generate Quiz"}
             </Button>
@@ -654,7 +654,7 @@ export function QuizzesTab({ userId }: UserAwareProps) {
                                     Taken: {quiz.takenAt ? formatDate(quiz.takenAt) : 'N/A'} | Score: {quiz.score !== undefined ? `${quiz.score}/${quiz.questions.length}` : 'N/A'}
                                 </p>
                             </div>
-                            <Button variant="outline" size="sm" onClick={() => startQuiz(quiz)} className={`study-action-button opacity-0 group-hover:opacity-100 transition-opacity`}>
+                            <Button variant="outline" size="sm" onClick={() => startQuiz(quiz)} className={`study-action-button opacity-0 group-hover:opacity-100 transition-opacity ${useNotebookTheme ? '' : ''}`}>
                                 <Play className="h-4 w-4 mr-1.5"/> Review / Retry
                             </Button>
                         </Card>
@@ -674,9 +674,19 @@ export function ProgressTab({ userId }: UserAwareProps) {
   const [isLoadingPlan, setIsLoadingPlan] = useState<boolean>(false);
   const [reviewPlan, setReviewPlan] = useState<string | null>(null);
   const [suggestedReviewTopics, setSuggestedReviewTopics] = useState<{topic: string, priority: string, reason?: string}[]>([]);
-  
+
   const progressQuery = useQuery(api.progress.getAll, { userId });
   const suggestReviewAction = useAction(api.ai.suggestReviewContent);
+
+  // New state for Spaced Repetition
+  const [isGeneratingSR, setIsGeneratingSR] = useState<boolean>(false);
+  const [srItems, setSrItems] = useState<SpacedRepetitionItem[]>([]);
+  const [currentSRItemIndex, setCurrentSRItemIndex] = useState<number>(0);
+  const [showSRAnswer, setShowSRAnswer] = useState<boolean>(false);
+  const [srError, setSrError] = useState<string | null>(null);
+
+  const generateSpacedRepetitionAction = useAction(api.ai.generateSpacedRepetitionItems);
+
 
   useEffect(() => {
     if (darkMode && !useNotebookTheme) document.documentElement.classList.add('dark');
@@ -706,8 +716,56 @@ export function ProgressTab({ userId }: UserAwareProps) {
     } finally { setIsLoadingPlan(false); }
   };
 
+  const handleGenerateSRItems = async () => {
+    if (progressData.length === 0 && !confirm("No progress data available. Generate generic items?")) {
+        toast.info("Spaced repetition generation cancelled.");
+        return;
+    }
+    setIsGeneratingSR(true);
+    setSrError(null);
+    try {
+      const response = await generateSpacedRepetitionAction({ progressData, itemCount: 5 });
+      if (response && response.items && response.items.length > 0) {
+        setSrItems(response.items);
+        setCurrentSRItemIndex(0);
+        setShowSRAnswer(false);
+        toast.success("Spaced repetition items ready!");
+      } else {
+        setSrError("No items were generated. Try again or adjust your study focus.");
+        toast.info("Could not generate spaced repetition items this time.");
+        setSrItems([]);
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      setSrError(`Failed to generate items: ${msg}`);
+      toast.error(`Failed: ${msg}`);
+      setSrItems([]);
+    } finally {
+      setIsGeneratingSR(false);
+    }
+  };
+
+  const handleSRNextItem = (confidence?: "again" | "hard" | "good" | "easy") => {
+    // In a real app, you'd send this confidence back to update the item's review schedule
+    // console.log(`SR Item: "${srItems[currentSRItemIndex]?.prompt}", Confidence: ${confidence}`);
+    // This could involve another mutation to update a 'spacedRepetitionProgress' table or similar.
+    // For example: await updateSRItemProgress({ itemId: srItems[currentSRItemIndex].id, confidence });
+
+    setShowSRAnswer(false);
+    if (srItems.length > 0) {
+      if (currentSRItemIndex < srItems.length - 1) {
+        setCurrentSRItemIndex((prevIndex) => prevIndex + 1);
+      } else {
+        // Reached end of current batch
+        toast.info("Finished this batch of practice items! Generate more or take a break.");
+        // Optionally, reshuffle or fetch new items. For now, we'll just allow regeneration.
+      }
+    }
+  };
+
+
   const getConfidenceColor = (confidence: number) => {
-    if (useNotebookTheme) { 
+    if (useNotebookTheme) {
         if (confidence >= 75) return 'text-green-700';
         if (confidence >= 50) return 'text-orange-600';
         return 'text-red-700';
@@ -716,7 +774,7 @@ export function ProgressTab({ userId }: UserAwareProps) {
     if (confidence >= 50) return darkMode ? 'text-yellow-400' : 'text-yellow-500';
     return darkMode ? 'text-red-400' : 'text-red-500';
   };
-   const getCardBgByConfidence = (confidence: number) => { 
+   const getCardBgByConfidence = (confidence: number) => {
     if (useNotebookTheme) {
         if (confidence >= 75) return 'bg-green-50 border-green-200';
         if (confidence >= 50) return 'bg-orange-50 border-orange-200';
@@ -731,17 +789,17 @@ export function ProgressTab({ userId }: UserAwareProps) {
     <div className={`study-tab-pane-container ${rootThemeClass}`}>
         <div className={`
             flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 pb-4 mb-6
-            ${useNotebookTheme 
-              ? 'study-tab-header-bar' 
+            ${useNotebookTheme
+              ? 'study-tab-header-bar'
               : (darkMode ? 'border-b border-neutral-700' : 'border-b border-gray-200')
             }
           `}>
             <div className={`flex items-center ${useNotebookTheme ? 'study-tab-title-group' : ''}`}>
               <div className={`
                 p-2.5 mr-3 rounded-xl shadow-md
-                ${useNotebookTheme 
-                  ? 'study-tab-title-icon progress-tab-icon-bg' 
-                  : (darkMode ? 'bg-sky-700' : 'bg-sky-600') // Adjusted for ProgressTab
+                ${useNotebookTheme
+                  ? 'study-tab-title-icon progress-tab-icon-bg'
+                  : (darkMode ? 'bg-sky-700' : 'bg-sky-600')
                 }
               `}>
                 <Activity className={`h-6 w-6 text-white ${useNotebookTheme ? '' : ''}`} />
@@ -749,14 +807,14 @@ export function ProgressTab({ userId }: UserAwareProps) {
               <div>
                 <h1 className={`
                   tracking-tight
-                  ${useNotebookTheme 
-                    ? 'study-tab-title' 
+                  ${useNotebookTheme
+                    ? 'study-tab-title'
                     : `text-3xl font-bold ${darkMode ? 'text-neutral-100' : 'text-gray-900'}`
                   }
                 `}>Learning Progress</h1>
                 <p className={`
-                  ${useNotebookTheme 
-                    ? 'study-tab-description' 
+                  ${useNotebookTheme
+                    ? 'study-tab-description'
                     : `text-sm ${darkMode ? 'text-neutral-400' : 'text-gray-500'}`
                   }
                 `}>Track your mastery across medical topics.</p>
@@ -767,8 +825,8 @@ export function ProgressTab({ userId }: UserAwareProps) {
                     <Button variant={viewMode === 'list' ? 'default' : 'ghost'} size="icon" onClick={() => setViewMode('list')} className={`rounded-md h-8 w-8 ${viewMode === 'list' && (useNotebookTheme ? 'bg-amber-500 text-white' : (darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')) }`} title="List View"><ListChecks className="h-4 w-4"/></Button>
                     <Button variant={viewMode === 'chart' ? 'default' : 'ghost'} size="icon" onClick={() => setViewMode('chart')} className={`rounded-md h-8 w-8 ${viewMode === 'chart' && (useNotebookTheme ? 'bg-amber-500 text-white' : (darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')) }`} title="Chart View"><TrendingUp className="h-4 w-4"/></Button>
                 </div>
-                <Button variant="outline" size="icon" onClick={() => setUseNotebookTheme(!useNotebookTheme)} className={`notetab-header-button ${useNotebookTheme ? 'active-theme-button' : ''}`} title="Toggle Notebook Theme"><Palette className="h-5 w-5"/></Button>
-                <Button variant="outline" size="icon" onClick={() => {if (!useNotebookTheme) setDarkMode(!darkMode); else toast.info("Dark mode not for notebook theme.");}} className="notetab-header-button" title="Toggle Dark Mode">{darkMode && !useNotebookTheme ? <Sun className="h-5 w-5"/> : <Moon className="h-5 w-5"/>}</Button>
+                <Button variant="outline" size="icon" onClick={() => setUseNotebookTheme(!useNotebookTheme)} className={`notetab-header-button ${useNotebookTheme ? 'active-theme-button' : ''} ${darkMode && !useNotebookTheme ? 'bg-neutral-800 border-neutral-700 hover:bg-neutral-700 text-neutral-300' : 'bg-white border-gray-200 hover:bg-gray-100 text-gray-700'}`} title="Toggle Notebook Theme"><Palette className="h-5 w-5"/></Button>
+                <Button variant="outline" size="icon" onClick={() => {if (!useNotebookTheme) setDarkMode(!darkMode); else toast.info("Dark mode not for notebook theme.");}} className={`notetab-header-button ${darkMode && !useNotebookTheme ? 'bg-neutral-800 border-neutral-700 hover:bg-neutral-700 text-neutral-300' : 'bg-white border-gray-200 hover:bg-gray-100 text-gray-700'}`} title="Toggle Dark Mode">{darkMode && !useNotebookTheme ? <Sun className="h-5 w-5"/> : <Moon className="h-5 w-5"/>}</Button>
             </div>
         </div>
 
@@ -789,103 +847,139 @@ export function ProgressTab({ userId }: UserAwareProps) {
                         <p className={`text-sm ${useNotebookTheme ? 'text-blue-800' : (darkMode ? 'text-neutral-300' : 'text-gray-700')}`}>{reviewPlan}</p>
                     </div>
                     {suggestedReviewTopics.length > 0 && (
-  <div>
-    <h4 className={`
-      font-medium mb-2 
-      ${useNotebookTheme 
-        ? 'text-blue-700' // Notebook theme specific color for this heading
-        : (darkMode ? 'text-neutral-200' : 'text-gray-700')
-      }
-    `}>Key Topics to Review:</h4>
-    <div className="space-y-2">
-      {suggestedReviewTopics.map((item, index) => (
-        <div 
-          key={index} 
-          className={`
-            p-3 rounded-md border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1
-            ${useNotebookTheme 
-              ? `bg-white border-blue-200 ${item.priority === 'High' ? 'border-l-red-400' : item.priority === 'Medium' ? 'border-l-yellow-400' : 'border-l-green-400'} border-l-4` 
-              : (darkMode 
-                  ? `bg-neutral-700 border-neutral-600 ${item.priority === 'High' ? 'border-l-red-500' : item.priority === 'Medium' ? 'border-l-yellow-500' : 'border-l-green-500'} border-l-4` 
-                  : `bg-white border-gray-200 ${item.priority === 'High' ? 'border-l-red-400' : item.priority === 'Medium' ? 'border-l-yellow-400' : 'border-l-green-400'} border-l-4 shadow-sm`)
-            }
-          `}
-        >
-          <div>
-            <span className={`
-              font-medium text-sm 
-              ${useNotebookTheme 
-                ? 'text-blue-800' 
-                : (darkMode ? 'text-neutral-100':'text-gray-800')
-              }
-            `}>{item.topic}</span>
-            {item.reason && 
-              <p className={`
-                text-xs 
-                ${useNotebookTheme 
-                  ? 'text-blue-600' 
-                  : (darkMode ? 'text-neutral-400':'text-gray-500')
-                }
-              `}>{item.reason}</p>
-            }
-          </div>
-          <Badge 
-            variant={
-              useNotebookTheme 
-                ? (item.priority === 'High' ? 'destructive' : item.priority === 'Medium' ? 'default' : 'outline')
-                : (item.priority === 'High' ? 'destructive' : item.priority === 'Medium' ? 'default' : 'outline')
-            } 
-            className={`
-              text-xs rounded-full mt-1 sm:mt-0
-              ${useNotebookTheme && item.priority === 'High' ? '!bg-red-100 !text-red-700 !border-red-300' : ''}
-              ${useNotebookTheme && item.priority === 'Medium' ? '!bg-yellow-100 !text-yellow-700 !border-yellow-300' : ''}
-              ${useNotebookTheme && item.priority === 'Low' ? '!bg-green-100 !text-green-700 !border-green-300' : ''}
-            `}
-          >
-            {item.priority}
-          </Badge>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
+                      <div>
+                        <h4 className={`font-medium mb-2 ${useNotebookTheme ? 'text-blue-700' : (darkMode ? 'text-neutral-200' : 'text-gray-700')}`}>Key Topics to Review:</h4>
+                        <div className="space-y-2">
+                          {suggestedReviewTopics.map((item, index) => (
+                            <div key={index} className={`p-3 rounded-md border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1
+                                ${useNotebookTheme ? `bg-white border-blue-200 ${item.priority === 'High' ? 'border-l-red-400' : item.priority === 'Medium' ? 'border-l-yellow-400' : 'border-l-green-400'} border-l-4`
+                                  : (darkMode ? `bg-neutral-700 border-neutral-600 ${item.priority === 'High' ? 'border-l-red-500' : item.priority === 'Medium' ? 'border-l-yellow-500' : 'border-l-green-500'} border-l-4`
+                                      : `bg-white border-gray-200 ${item.priority === 'High' ? 'border-l-red-400' : item.priority === 'Medium' ? 'border-l-yellow-400' : 'border-l-green-400'} border-l-4 shadow-sm`)}`}>
+                              <div>
+                                <span className={`font-medium text-sm ${useNotebookTheme ? 'text-blue-800' : (darkMode ? 'text-neutral-100':'text-gray-800')}`}>{item.topic}</span>
+                                {item.reason && <p className={`text-xs ${useNotebookTheme ? 'text-blue-600' : (darkMode ? 'text-neutral-400':'text-gray-500')}`}>{item.reason}</p>}
+                              </div>
+                              <Badge variant={useNotebookTheme ? (item.priority === 'High' ? 'destructive' : item.priority === 'Medium' ? 'default' : 'outline') : (item.priority === 'High' ? 'destructive' : item.priority === 'Medium' ? 'default' : 'outline')}
+                                className={`text-xs rounded-full mt-1 sm:mt-0
+                                  ${useNotebookTheme && item.priority === 'High' ? '!bg-red-100 !text-red-700 !border-red-300' : ''}
+                                  ${useNotebookTheme && item.priority === 'Medium' ? '!bg-yellow-100 !text-yellow-700 !border-yellow-300' : ''}
+                                  ${useNotebookTheme && item.priority === 'Low' ? '!bg-green-100 !text-green-700 !border-green-300' : ''}`}>
+                                {item.priority}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     <Button onClick={() => {setReviewPlan(null); setSuggestedReviewTopics([])}} variant="outline" className={`w-full mt-3 study-action-button ${useNotebookTheme ? '!bg-transparent !border-amber-500 !text-amber-700 hover:!bg-amber-50' : ''}`}>
                         <RotateCcw className="h-4 w-4 mr-2"/> Clear Plan & Regenerate
                     </Button>
                 </motion.div>
             ) : ( <div className={`text-center py-6 ${useNotebookTheme ? 'text-amber-700' : ''}`}> <Info className={`h-8 w-8 mx-auto mb-2 ${useNotebookTheme ? 'text-amber-500' : (darkMode ? 'text-neutral-500' : 'text-gray-400')}`} /> <p>No plan generated.</p> </div> )}
-            {!reviewPlan && !isLoadingPlan && ( <Button onClick={handleGenerateReviewPlan} className={`w-full study-action-button primary`}> <Sparkles className="h-4 w-4 mr-2"/> Generate Review Plan </Button> )}
+            {!reviewPlan && !isLoadingPlan && ( <Button onClick={handleGenerateReviewPlan} className={`w-full study-action-button primary ${useNotebookTheme ? '' : ''}`}> <Sparkles className="h-4 w-4 mr-2"/> Generate Review Plan </Button> )}
         </CardContent>
       </Card>
+
+      {/* Spaced Repetition Section */}
+      <Card className={`study-card-notebook mt-8 ${useNotebookTheme ? '' : (darkMode ? 'bg-neutral-800' : 'bg-white')}`}>
+        <CardHeader className={`study-card-header-notebook`}>
+          <div className="flex items-center gap-3">
+            <TargetIcon className={`h-5 w-5 ${useNotebookTheme ? 'text-purple-500' : (darkMode ? 'text-purple-400' : 'text-purple-600')}`} />
+            <CardTitle className={`card-title-text`}>Spaced Repetition Practice</CardTitle>
+          </div>
+          <CardDescription className={`card-description-text`}>
+            Boost your memory with AI-powered recall prompts.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="study-card-content-notebook space-y-4">
+          {isGeneratingSR ? (
+            <div className="flex items-center justify-center p-6 text-center">
+              <Loader2 className={`h-6 w-6 animate-spin mr-3 ${useNotebookTheme ? 'text-amber-600' : ''}`}/>
+              <p className={`${useNotebookTheme ? 'text-amber-700' : ''}`}>Crafting your practice items...</p>
+            </div>
+          ) : srError ? (
+            <div className={`p-4 rounded-md border text-sm flex items-center gap-2 ${useNotebookTheme ? 'bg-red-50 text-red-700 border-red-200' : (darkMode ? 'bg-red-900/20 text-red-300 border-red-700/50' : 'bg-red-50 text-red-600 border-red-200')}`}>
+                <AlertCircle className="h-5 w-5" /> {srError}
+            </div>
+          ) : srItems.length > 0 ? (
+            <div className="space-y-4">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentSRItemIndex}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className={`p-4 rounded-lg border ${useNotebookTheme ? 'bg-amber-50 border-amber-200' : (darkMode ? 'bg-neutral-700 border-neutral-600' : 'bg-gray-100 border-gray-200')}`}
+                >
+                  <p className={`font-medium text-xs uppercase tracking-wider mb-1 ${useNotebookTheme ? 'text-amber-700' : (darkMode ? 'text-neutral-400' : 'text-gray-500')}`}>
+                    {srItems[currentSRItemIndex]?.topic}
+                  </p>
+                  <p className={`text-lg mb-3 ${useNotebookTheme ? 'text-gray-700 font-["Kalam"]' : (darkMode ? 'text-neutral-100' : 'text-gray-800')}`}>
+                    {srItems[currentSRItemIndex]?.prompt}
+                  </p>
+
+                  {showSRAnswer && (
+                    <motion.div
+                      initial={{opacity:0, height:0}} animate={{opacity:1, height: 'auto'}} transition={{duration:0.3}}
+                      className={`mt-3 pt-3 border-t ${useNotebookTheme ? 'border-amber-300' : (darkMode ? 'border-neutral-600' : 'border-gray-300')}`}
+                    >
+                      <p className={`text-md font-semibold ${useNotebookTheme ? 'text-green-700 font-["Kalam"]' : (darkMode ? 'text-green-400' : 'text-green-600')}`}>
+                        {srItems[currentSRItemIndex]?.answer}
+                      </p>
+                    </motion.div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowSRAnswer(prev => !prev)}
+                  className={`w-full sm:w-auto study-action-button ${useNotebookTheme ? '!bg-transparent !border-amber-500 !text-amber-700 hover:!bg-amber-50' : ''}`}
+                >
+                  {showSRAnswer ? "Hide" : "Show"} Answer
+                </Button>
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <Button onClick={() => handleSRNextItem("again")} variant="outline" className={`flex-1 study-action-button ${useNotebookTheme ? '!border-red-300 !text-red-600 hover:!bg-red-50' : (darkMode ? 'border-red-500/50 text-red-300 hover:bg-red-500/20' : 'border-red-300 text-red-600 hover:bg-red-50')}`}>Again</Button>
+                  <Button onClick={() => handleSRNextItem("good")} className={`flex-1 study-action-button primary ${useNotebookTheme ? '!bg-green-500 hover:!bg-green-600' : (darkMode ? 'bg-green-600 hover:bg-green-500' : 'bg-green-500 hover:bg-green-600')}`}>Good</Button>
+                  <Button onClick={() => handleSRNextItem("easy")} variant="outline" className={`flex-1 study-action-button ${useNotebookTheme ? '!border-blue-300 !text-blue-600 hover:!bg-blue-50' : (darkMode ? 'border-blue-500/50 text-blue-300 hover:bg-blue-500/20' : 'border-blue-300 text-blue-600 hover:bg-blue-50')}`}>Easy</Button>
+                </div>
+              </div>
+              {srItems.length > 1 && <Progress value={((currentSRItemIndex + 1) / srItems.length) * 100} className={`h-2 mt-3 ${useNotebookTheme ? 'progress-bar-notebook [&>*]:!bg-purple-500' : (darkMode ? '[&>*]:bg-purple-500' : '[&>*]:bg-purple-600')}`} />}
+            </div>
+          ) : (
+            <div className={`text-center py-6 ${useNotebookTheme ? 'text-amber-700' : (darkMode ? 'text-neutral-400' : 'text-gray-500')}`}>
+              <TargetIcon className={`h-8 w-8 mx-auto mb-2 ${useNotebookTheme ? 'text-amber-500' : (darkMode ? 'text-neutral-500' : 'text-gray-400')}`} />
+              <p>Ready for a quick brain workout?</p>
+            </div>
+          )}
+          <Button
+            onClick={handleGenerateSRItems}
+            disabled={isGeneratingSR}
+            className={`w-full study-action-button primary ${useNotebookTheme ? '' : ''} mt-2`}
+          >
+            {isGeneratingSR ? <Loader2 className="h-4 w-4 mr-2 animate-spin"/> : <Sparkles className="h-4 w-4 mr-2"/>}
+            {srItems.length > 0 ? "Get More Practice Items" : "Generate Practice Items"}
+          </Button>
+        </CardContent>
+      </Card>
+
 
       <div className="space-y-4 mt-8">
         <h2 className={`text-2xl font-semibold border-b pb-2 mb-4 ${useNotebookTheme ? 'text-amber-800 border-amber-200' : (darkMode ? 'text-neutral-100 border-neutral-700' : 'text-gray-800 border-gray-200')}`}>Topic Mastery</h2>
         {!progressQuery && <div className="p-6 text-center"><Loader2 className="h-8 w-8 animate-spin mx-auto"/> <p className="mt-2 text-sm">Loading...</p></div>}
         {progressQuery && progressData.length === 0 && (
-  <div className={`
-    text-center py-10 rounded-xl 
-    ${useNotebookTheme 
-      ? 'bg-yellow-50 border-2 border-dashed border-yellow-200 text-amber-700' 
-      : (darkMode ? 'bg-neutral-800 border border-neutral-700 text-neutral-400' : 'bg-white border border-gray-200 shadow-sm text-gray-500')
-    }
-  `}>
-    <TrendingUp className={`h-12 w-12 mx-auto mb-3 ${useNotebookTheme ? 'text-yellow-600' : (darkMode ? 'text-neutral-500' : 'text-gray-400')}`} />
-    <h3 className={`
-      text-lg font-medium 
-      ${useNotebookTheme 
-        ? 'text-yellow-800' 
-        : (darkMode ? 'text-neutral-200' : 'text-gray-700')
-      }
-    `}>No Progress Tracked Yet</h3>
-    <p className={`mt-1 text-sm`}>
-      Review flashcards and take quizzes to see your learning progress here.
-    </p>
-  </div>
-)}
+          <div className={`text-center py-10 rounded-xl ${useNotebookTheme ? 'bg-yellow-50 border-2 border-dashed border-yellow-200 text-amber-700' : (darkMode ? 'bg-neutral-800 border border-neutral-700 text-neutral-400' : 'bg-white border border-gray-200 shadow-sm text-gray-500')}`}>
+            <TrendingUp className={`h-12 w-12 mx-auto mb-3 ${useNotebookTheme ? 'text-yellow-600' : (darkMode ? 'text-neutral-500' : 'text-gray-400')}`} />
+            <h3 className={`text-lg font-medium ${useNotebookTheme ? 'text-yellow-800' : (darkMode ? 'text-neutral-200' : 'text-gray-700')}`}>No Progress Tracked Yet</h3>
+            <p className={`mt-1 text-sm`}>Review flashcards and take quizzes to see your learning progress here.</p>
+          </div>
+        )}
         {progressQuery && progressData.length > 0 && viewMode === 'list' && (
             <div className="space-y-3">
             {progressData.map((item) => (
-              <Card key={item._id?.toString()} className={`p-4 rounded-lg shadow-md group transition-all duration-150 progress-item-card 
+              <Card key={item._id?.toString()} className={`p-4 rounded-lg shadow-md group transition-all duration-150 progress-item-card
                                                             ${useNotebookTheme ? getCardBgByConfidence(item.confidence) : (darkMode ? 'bg-neutral-800 border-neutral-700 hover:border-neutral-600' : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-lg')}`}>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                     <div className="flex-1">
@@ -902,27 +996,15 @@ export function ProgressTab({ userId }: UserAwareProps) {
           </div>
         )}
         {progressQuery && progressData.length > 0 && viewMode === 'chart' && (
-  <div className={`
-    p-6 rounded-xl shadow-lg h-96 flex items-center justify-center text-center 
-    ${useNotebookTheme 
-      ? 'bg-yellow-50 border-2 border-dashed border-yellow-200 text-amber-700' 
-      : (darkMode ? 'bg-neutral-800 border-neutral-700 text-neutral-400' : 'bg-white border-gray-200 text-gray-600')
-    }
-  `}>
-    <div>
-      <TrendingUp /* Changed from BarChart for consistency with other empty state */ className={`h-16 w-16 mx-auto mb-4 ${useNotebookTheme ? 'text-yellow-500' : (darkMode ? 'text-sky-400' : 'text-sky-500')}`} />
-      <p className={`font-medium ${useNotebookTheme ? 'text-lg' : ''}`}>
-        Progress Chart View
-      </p>
-      <p className={`text-sm ${useNotebookTheme ? '' : (darkMode ? 'text-neutral-500' : 'text-gray-500')}`}>
-        A visual representation of your topic mastery will appear here in a future update!
-      </p>
-      <p className={`text-xs mt-1 ${useNotebookTheme ? 'text-amber-600' : (darkMode ? 'text-neutral-600' : 'text-gray-400')}`}>
-        (Requires a chart library like Recharts or Chart.js for implementation)
-      </p>
-    </div>
-  </div>
-)}
+          <div className={`p-6 rounded-xl shadow-lg h-96 flex items-center justify-center text-center ${useNotebookTheme ? 'bg-yellow-50 border-2 border-dashed border-yellow-200 text-amber-700' : (darkMode ? 'bg-neutral-800 border-neutral-700 text-neutral-400' : 'bg-white border-gray-200 text-gray-600')}`}>
+            <div>
+              <TrendingUp className={`h-16 w-16 mx-auto mb-4 ${useNotebookTheme ? 'text-yellow-500' : (darkMode ? 'text-sky-400' : 'text-sky-500')}`} />
+              <p className={`font-medium ${useNotebookTheme ? 'text-lg' : ''}`}>Progress Chart View</p>
+              <p className={`text-sm ${useNotebookTheme ? '' : (darkMode ? 'text-neutral-500' : 'text-gray-500')}`}>A visual representation of your topic mastery will appear here in a future update!</p>
+              <p className={`text-xs mt-1 ${useNotebookTheme ? 'text-amber-600' : (darkMode ? 'text-neutral-600' : 'text-gray-400')}`}> (Requires a chart library like Recharts or Chart.js for implementation)</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

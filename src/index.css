@@ -1887,136 +1887,75 @@ body {
 
 /* === Paper Notebook Theme for StudyTabs (Flashcards, Quizzes, Progress) === */
 
-/* General container for each study tab when notebook theme is active */
+/* In src/index.css, within or after your existing .notebook-theme styles */
+
 .notebook-theme .study-tab-pane-container {
-  background-color: #FAF0E6; /* Overall theme background */
+  background-color: #FAF0E6; /* Linen */
   font-family: 'Patrick Hand', cursive;
-  color: #3D2B1F; /* Default text color */
-  padding: 1.5rem; /* Add some padding to the tab content area */
+  color: #3D2B1F; /* Dark coffee brown */
+  padding: 1.5rem; /* Ensure this is suitable or adjust */
 }
 
-/* Header bar within each study tab */
-.notebook-theme .study-tab-header-bar {
-  display: flex;
-  flex-direction: column; /* Stack title and controls on small screens */
-  gap: 0.75rem; /* Space between title group and button group */
-  padding-bottom: 1rem;
-  margin-bottom: 1.5rem;
-  border-bottom: 1px dashed #E0D8CD; /* Dashed separator */
-}
-@media (min-width: 640px) { /* sm breakpoint */
-  .notebook-theme .study-tab-header-bar {
-    flex-direction: row; /* Row layout on larger screens */
-    justify-content: space-between;
-    align-items: center;
-  }
-}
-
-.notebook-theme .study-tab-title-group {
-  display: flex;
-  align-items: center;
-}
-
-.notebook-theme .study-tab-title-icon {
-  padding: 0.625rem; /* 10px */
-  margin-right: 0.75rem; /* 12px */
-  border-radius: 0.75rem; /* 12px */
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-/* Specific icon background colors for each study tab */
-.notebook-theme .flashcard-tab-icon-bg { background-color: #E1BEE7; /* Light purple */ }
-.notebook-theme .quiz-tab-icon-bg { background-color: #C5E1A5; /* Light green */ }
-.notebook-theme .progress-tab-icon-bg { background-color: #81D4FA; /* Light blue */ }
-
-.notebook-theme .study-tab-title-icon svg {
-  height: 1.5rem; /* 24px */
-  width: 1.5rem; /* 24px */
-  color: white;
-}
-
-.notebook-theme .study-tab-title {
-  font-family: 'Caveat', cursive;
-  color: #4A3B31; /* Dark coffee brown */
-  font-size: 2rem;
-  line-height: 1.2;
-}
-.notebook-theme .study-tab-description {
-  font-family: 'Patrick Hand', cursive;
-  color: #795548; /* Muted brown */
-  font-size: 0.9rem;
-}
-
-.notebook-theme .study-tab-header-controls .notetab-header-button { /* Re-use style from NoteTabs */
-  background-color: #FFFBF0;
-  color: #5D4037;
-  border: 1px solid #E0D8CD;
-}
-.notebook-theme .study-tab-header-controls .notetab-header-button:hover {
-  background-color: #F7F1E9;
-}
-.notebook-theme .study-tab-header-controls .notetab-header-button.active-theme-button {
-    background-color: #FFE082; /* Yellow for active Palette */
-    border-color: #FFCA28;
-}
-
-
-/* Cards within Study Tabs */
-.notebook-theme .study-card-notebook { /* General card style for this section */
+/* General card inside StudyTabs with notebook theme */
+.notebook-theme .study-card-notebook {
   background-color: #FFFBF0; /* Light cream paper */
   border: 1px solid #E0D8CD; /* Paper edge */
   box-shadow: 0 3px 10px rgba(0,0,0,0.07);
   border-radius: 8px;
-  overflow: hidden; /* Ensure child elements adhere to border radius */
+  overflow: hidden; /* Good practice */
 }
-.notebook-theme .study-card-notebook .study-card-header-notebook {
+
+.notebook-theme .study-card-header-notebook {
   border-bottom: 1px dashed #D3C9BC;
   padding: 1rem 1.25rem;
   font-family: 'Architects Daughter', cursive;
-  color: #4A3B31;
+  color: #4A3B31; /* For titles within the card */
 }
-.notebook-theme .study-card-notebook .study-card-header-notebook .card-title-text {
-  font-size: 1.3em;
+.notebook-theme .study-card-header-notebook .card-title-text {
+    font-size: 1.3em; /* Or your preferred size */
 }
-.notebook-theme .study-card-notebook .study-card-header-notebook .card-description-text {
-  font-size: 0.9em;
-  color: #795548;
-}
-.notebook-theme .study-card-notebook .study-card-content-notebook {
-  padding: 1.25rem;
-}
-.notebook-theme .study-card-notebook .study-card-footer-notebook {
-  border-top: 1px dashed #D3C9BC;
-  padding: 1rem 1.25rem;
-  background-color: #FAF5EF; /* Slightly different footer bg */
+.notebook-theme .study-card-header-notebook .card-description-text {
+    font-size: 0.9em;
+    color: #795548; /* Muted brown for descriptions */
 }
 
-/* Inputs and Selects */
+.notebook-theme .study-card-content-notebook {
+  padding: 1.25rem;
+}
+
+.notebook-theme .study-card-footer-notebook {
+  border-top: 1px dashed #D3C9BC;
+  padding: 1rem 1.25rem;
+  background-color: #FAF5EF; /* Slightly different footer background */
+}
+
 .notebook-theme .study-input-notebook,
 .notebook-theme .study-select-notebook {
-  background-color: #fff;
-  border: 1px solid #E0D8CD;
+  background-color: #fff; /* White paper for inputs */
+  border: 1px solid #E0D8CD; /* Paper edge border */
   border-radius: 6px;
   font-family: 'Kalam', cursive;
   color: #4A3B31;
   padding: 0.6rem 0.75rem;
-  height: 2.5rem; /* Consistent height */
+  box-shadow: inset 1px 1px 2px rgba(0,0,0,0.04);
+  /* Ensure height is consistent if needed, e.g., height: 2.5rem; */
 }
 .notebook-theme .study-input-notebook::placeholder {
-  color: #A89F94;
+  color: #A89F94; /* Softer placeholder */
 }
 .notebook-theme .study-select-notebook {
-  appearance: none; /* Basic reset for custom arrow */
+  appearance: none;
   background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23795548%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E');
   background-repeat: no-repeat;
   background-position: right .7em top 50%;
   background-size: .65em auto;
-  padding-right: 2.5em;
+  padding-right: 2.5em; /* For custom arrow */
+  height: 2.5rem; /* Match input height */
 }
 
 
-/* Buttons */
 .notebook-theme .study-action-button {
-  background-color: #A9D18E; /* Muted green */
+  background-color: #A9D18E; /* Muted, natural green */
   color: white;
   border: 1px solid #8DBF6E;
   font-family: 'Patrick Hand', cursive;
@@ -2024,26 +1963,76 @@ body {
   padding: 0.6rem 1.2rem;
   border-radius: 5px;
   box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+  transition: background-color 0.2s, transform 0.1s;
 }
 .notebook-theme .study-action-button:hover {
   background-color: #97C97C;
   transform: translateY(-1px);
 }
-.notebook-theme .study-action-button.primary { /* For main generate/start buttons */
-  background-color: #FFB74D; /* Orange */
-  color: #4E342E; /* Dark brown text */
-  border-color: #FFA726;
+ .notebook-theme .study-action-button.primary { /* For more prominent actions like Generate */
+    background-color: #FFB74D; /* Warm Orange */
+    color: #4E342E; /* Dark brown text */
+    border-color: #FFA726;
 }
 .notebook-theme .study-action-button.primary:hover {
-  background-color: #FFA726;
+    background-color: #FFA726;
+}
+
+/* Progress Bar Theming */
+.notebook-theme .progress-bar-notebook {
+  background-color: #E0D8CD !important; /* Paper edge color for track */
+  height: 0.75rem !important; /* Thicker for a chunkier look */
+  border-radius: 5px !important;
+  border: 1px solid #D3C9BC;
+  padding: 2px; /* Inner padding */
+}
+.notebook-theme .progress-bar-notebook > div { /* The actual progress fill */
+  background-color: #A9D18E !important; /* Muted green for progress */
+  border-radius: 3px !important;
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.1);
+}
+
+/* Specific for Progress Tab Topic Item if needed */
+.notebook-theme .progress-item-card {
+    background-color: #FFFDE7; /* Very pale yellow */
+    border: 1px dashed #FFECB3; /* Dashed border */
+}
+.notebook-theme .progress-item-card .progress-topic-title {
+    font-family: 'Architects Daughter', cursive;
+    color: #795548; /* Brown */
 }
 
 
-/* Flashcard Specific */
+/* Styles for header bar and icons within it - adapt from your other themed tabs */
+.notebook-theme .study-tab-header-bar {
+  /* ... (styles from your NoteTabs or AskTabs notebook header bar) ... */
+}
+.notebook-theme .study-tab-title-group {
+  /* ... */
+}
+.notebook-theme .study-tab-title-icon {
+  /* ... */
+}
+.notebook-theme .flashcard-tab-icon-bg { background-color: #E1BEE7; /* Light purple */ }
+.notebook-theme .quiz-tab-icon-bg { background-color: #C5E1A5; /* Light green */ }
+.notebook-theme .progress-tab-icon-bg { background-color: #81D4FA; /* Light blue */ }
+
+.notebook-theme .study-tab-title {
+  /* ... */
+}
+.notebook-theme .study-tab-description {
+  /* ... */
+}
+.notebook-theme .study-tab-header-controls .notetab-header-button {
+  /* ... (reuse from NoteTabs if applicable) ... */
+}
+
+
+/* Flashcard Deck Specific Styling */
 .notebook-theme .flashcard-deck-card {
   background-color: #FFF9C4; /* Light yellow for deck */
   border: 1px dashed #FFECB3; /* Dashed border */
-  color: #795548;
+  color: #795548; /* Text color */
 }
 .notebook-theme .flashcard-deck-card .deck-title {
   font-family: 'Architects Daughter', cursive;
@@ -2053,17 +2042,16 @@ body {
   background-color: #FFE0B2; /* Lighter orange */
   color: #E65100; /* Dark orange */
   font-family: 'Patrick Hand', cursive;
+  border: 1px solid #FFCC80;
 }
 
-/* Quiz Specific */
+/* Quiz Option Buttons */
 .notebook-theme .quiz-option-button {
   background-color: #fff;
   border: 1px solid #E0D8CD;
   color: #4A3B31;
   font-family: 'Kalam', cursive;
-  justify-content: flex-start;
-  text-align: left;
-  padding: 0.75rem 1rem;
+  /* ... other styles ... */
 }
 .notebook-theme .quiz-option-button:hover {
   background-color: #F8F0E3;
@@ -2073,6 +2061,8 @@ body {
   border-color: #B39DDB;
   color: #4527A0; /* Dark purple */
 }
+
+/* Quiz Result Styling */
 .notebook-theme .quiz-result-correct {
   border-left-color: #66BB6A !important; /* Green for correct */
   background-color: #E8F5E9 !important;
@@ -2080,51 +2070,6 @@ body {
 .notebook-theme .quiz-result-incorrect {
   border-left-color: #EF5350 !important; /* Red for incorrect */
   background-color: #FFEBEE !important;
-}
-
-
-/* Progress Specific */
-.notebook-theme .progress-item-card {
-  background-color: #E0F7FA; /* Light cyan */
-  border: 1px solid #B2EBF2;
-  color: #006064;
-}
-.notebook-theme .progress-item-card .progress-bar-notebook {
-  background-color: #B2EBF2; /* Lighter track */
-}
-.notebook-theme .progress-item-card .progress-bar-notebook > div { /* The actual progress fill */
-  background-color: #00ACC1; /* Cyan fill */
-}
-.notebook-theme .progress-item-card .progress-topic-title {
-  font-family: 'Architects Daughter', cursive;
-}
-
-/* StudyCard component when inside notebook theme */
-.notebook-theme .study-card-container {
-  /* Assuming StudyCard has a root class 'study-card-container' */
-  /* Override its default modern look with notebook styles */
-}
-.notebook-theme .study-card-container .study-card-front-notebook, /* Define new classes if StudyCard can take theme prop */
-.notebook-theme .study-card-container .study-card-back-notebook {
-  background-color: #fff; /* White paper for card face */
-  border: 2px dashed #D3C9BC;
-  border-radius: 10px;
-  box-shadow: 3px 3px 8px rgba(0,0,0,0.1);
-  font-family: 'Kalam', cursive;
-  color: #333;
-}
-.notebook-theme .study-card-container .study-card-front-notebook {
-  /* Lined paper effect for front if desired */
-  background-image: linear-gradient(to bottom, transparent 1.0em, #EAE0D6 1.0em, #EAE0D6 1.05em, transparent 1.05em);
-  background-size: 100% 1.7em;
-  line-height: 1.7em;
-}
-.notebook-theme .study-card-container .study-card-back-notebook {
-  background-color: #FFFDE7; /* Pale yellow for back */
-}
-.notebook-theme .study-card-container .study-card-button-notebook { /* For buttons within StudyCard */
-  font-family: 'Patrick Hand', cursive;
-  /* Add more styles if StudyCard buttons need theming */
 }
 
 /* === Creative Paper Notebook Theme for StudyPlanTab === */
@@ -3085,68 +3030,81 @@ body {
   min-height: 100vh;
 }
 
-/* Header Bar */
+/* === Artistic Scrapbook/Journal Notebook Theme for BookmarksTab (CSS Update) === */
+
+/* ... (keep existing .notebook-theme .bookmarkstab-container and other non-header styles) ... */
+
+/* MODIFIED Header Bar for BookmarksTab for better consistency */
 .notebook-theme .bookmarkstab-header-bar {
   display: flex;
-  flex-direction: column; 
-  gap: 0.75rem;
+  flex-direction: column; /* Mobile first: title group above controls */
+  gap: 0.75rem; /* Space between title group and controls on mobile */
   padding-bottom: 1.5rem;
   margin-bottom: 2rem;
-  border-bottom: 1px solid transparent; /* Use pseudo for decorative */
+  border-bottom: 1px dashed #D2B48C; /* Keep the dashed line */
   position: relative;
-  background: linear-gradient(to bottom, rgba(245, 232, 214, 0.5), rgba(245, 232, 214, 0)); /* Faded top */
 }
-.notebook-theme .bookmarkstab-header-bar::after { /* Decorative flourish/border */
-  content: '❦'; /* Floral heart character */
-  display: block;
-  text-align: center;
-  font-size: 1.8rem;
-  color: #BCAAA4; /* Muted flourish color */
-  margin-top: 0.5rem;
-}
-@media (min-width: 768px) { /* md breakpoint */
+@media (min-width: 768px) { /* md breakpoint: Desktop layout */
   .notebook-theme .bookmarkstab-header-bar {
-    flex-direction: row;
+    flex-direction: row; /* Title group left, controls right */
     justify-content: space-between;
     align-items: center;
   }
 }
+/* Remove the ::after flourish if it complicates layout, or keep if desired and styled well */
+.notebook-theme .bookmarkstab-header-bar::after { 
+  content: '❦'; 
+  display: block; text-align: center; font-size: 1.5rem; color: #BCAAA4; margin-top: 0.25rem;
+  width: 100%; /* Make it a full-width separator for mobile */
+}
+@media (min-width: 768px) {
+  .notebook-theme .bookmarkstab-header-bar::after {
+    display: none; /* Hide flourish on desktop if border-bottom is enough */
+  }
+}
 
-.notebook-theme .bookmarkstab-title-group { display: flex; align-items: center; }
+
+.notebook-theme .bookmarkstab-title-group { 
+  display: flex; 
+  align-items: center; 
+  /* No longer flex-direction: column for notebook theme to match original theme layout */
+}
 .notebook-theme .bookmarkstab-title-icon-bg {
   background: #C5CAE9; /* Lavender/Vintage Blue */
-  border: 2px dotted #9FA8DA; /* Dotted border for "stitched patch" look */
+  border: 2px dotted #9FA8DA; 
   padding: 0.75rem;
   margin-right: 1rem;
-  border-radius: 8px; /* Soft square */
-  transform: rotate(-3deg); /* Slightly tilted */
+  border-radius: 8px; 
+  transform: rotate(-2deg); /* Keep slight tilt */
   box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
 }
-.notebook-theme .bookmarkstab-title-icon-bg svg { height: 1.75rem; width: 1.75rem; color: #3F51B5; /* Indigo */ }
+.notebook-theme .bookmarkstab-title-icon-bg svg { height: 1.75rem; width: 1.75rem; color: #3F51B5; }
 
 .notebook-theme .bookmarkstab-title {
-  font-family: 'Dancing Script', cursive; /* Elegant script font */
-  color: #5D4037; /* Earthy Brown */
-  font-size: 2.6rem;
-  text-shadow: 1px 1px 0px #FFFDE7; /* Light cream shadow */
+  font-family: 'Dancing Script', cursive; 
+  color: #5D4037; 
+  font-size: 2.2rem; /* Adjusted size */
+  text-shadow: 1px 1px 0px #FFFDE7;
 }
 .notebook-theme .bookmarkstab-description {
   font-family: 'Architects Daughter', cursive;
-  color: #A1887F; /* Muted Sepia */
-  font-size: 1rem;
+  color: #A1887F; 
+  font-size: 0.9rem; /* Adjusted size */
   margin-top: 0.15rem;
 }
 
 .notebook-theme .bookmarkstab-header-controls .notetab-header-button {
-  background-color: rgba(255,253,240,0.7); /* Ivory, slightly transparent */
-  border: 1px solid #F0E68C; /* Khaki border */
+  background-color: rgba(255,253,240,0.7); 
+  border: 1px solid #F0E68C; 
   color: #795548;
-  border-radius: 50%; height: 2.75rem; width: 2.75rem; /* Round buttons */
+  border-radius: 50%; height: 2.75rem; width: 2.75rem; 
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 .notebook-theme .bookmarkstab-header-controls .notetab-header-button.active-theme-button {
-  background-color: #FFD54F; border-color: #FFB300; color: #4E342E; /* Gold/Amber */
+  background-color: #FFD54F; border-color: #FFB300; color: #4E342E; 
 }
+
+/* ... (Rest of your existing artistic styles for bookmarks-controls-area, bookmark-item-card, etc.) ... */
 
 /* Search and Filter Area */
 .notebook-theme .bookmarks-controls-area {

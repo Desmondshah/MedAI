@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api"; // Adjusted path
+import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import { toast } from "sonner";
 import {
   Bookmark as BookmarkIcon, FileText, X, Search, LayoutGrid, ListChecks,
   Sun, Moon, Palette, MoreHorizontal, Trash2, Eye, Edit3, Plus, AlertTriangle, MessageCircle,
-  ArchiveRestore, Loader2, SlidersHorizontal, CheckCircle2 // Added missing icons
+  ArchiveRestore, Loader2, SlidersHorizontal, CheckCircle2
 } from "lucide-react";
-import { Button } from "../../components/ui/button"; // Adjusted path
-import { Input } from "../../components/ui/input";   // Adjusted path
-import { Textarea } from "../../components/ui/textarea"; // Adjusted path
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Textarea } from "../../components/ui/textarea";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose,
-} from "../../components/ui/dialog"; // Adjusted path
-import { Badge } from "../../components/ui/badge";   // Adjusted path
+} from "../../components/ui/dialog";
+import { Badge } from "../../components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface UserAwareProps {
@@ -28,13 +28,13 @@ interface BookmarkNote {
 }
 
 interface Bookmark {
-  _id: Id<"bookmarks">; // Use Convex Id type for _id
+  _id: Id<"bookmarks">;
   _creationTime?: number;
   userId?: Id<"users">;
   noteId?: Id<"notes">;
   createdAt: number;
   note: BookmarkNote | null;
-  comment?: string | null; // Allow undefined, null, or string
+  comment?: string | null;
 }
 
 const formatDate = (timestamp: number | undefined, options?: Intl.DateTimeFormatOptions): string => {
@@ -53,10 +53,10 @@ export function BookmarksTab({ userId }: UserAwareProps) {
   const [filteredBookmarks, setFilteredBookmarks] = useState<Bookmark[]>([]);
   
   const [darkMode, setDarkMode] = useState<boolean>(false);
-  const [useNotebookTheme, setUseNotebookTheme] = useState<boolean>(false); // Notebook theme state
+  const [useNotebookTheme, setUseNotebookTheme] = useState<boolean>(false);
 
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [categories, setCategories] = useState<string[]>(["All", "Important", "Notes", "Lectures"]); // Added "Lectures"
+  const [categories, setCategories] = useState<string[]>(["All", "Important", "Notes", "Lectures"]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [editingComment, setEditingComment] = useState<string>("");
@@ -77,12 +77,12 @@ export function BookmarksTab({ userId }: UserAwareProps) {
       const normalizedBookmarks = getBookmarksQuery
         .map(bookmark => ({
           ...bookmark,
-          _id: bookmark._id, // Already Id<"bookmarks">
+          _id: bookmark._id, 
           comment: bookmark.comment === undefined ? null : bookmark.comment,
           noteId: bookmark.noteId as Id<"notes"> | undefined
         }))
         .sort((a,b) => b.createdAt - a.createdAt);
-      setBookmarks(normalizedBookmarks as Bookmark[]); // Cast to Bookmark[]
+      setBookmarks(normalizedBookmarks as Bookmark[]);
       setIsLoading(false);
     } else if (getBookmarksQuery === undefined) {
         // Still loading
@@ -97,8 +97,8 @@ export function BookmarksTab({ userId }: UserAwareProps) {
     if (selectedCategory !== "All") {
       tempBookmarks = tempBookmarks.filter(bookmark => {
         if (selectedCategory === "Important" && bookmark.comment && bookmark.comment.trim() !== "") return true;
-        if (selectedCategory === "Notes" && bookmark.noteId && (!bookmark.note?.tags || !bookmark.note.tags.includes("lecture"))) return true; // Notes that are not lectures
-        if (selectedCategory === "Lectures" && bookmark.note?.tags?.includes("lecture")) return true; // Assuming "lecture" tag
+        if (selectedCategory === "Notes" && bookmark.noteId && (!bookmark.note?.tags || !bookmark.note.tags.includes("lecture"))) return true;
+        if (selectedCategory === "Lectures" && bookmark.note?.tags?.includes("lecture")) return true;
         return false; 
       });
     }
@@ -126,7 +126,6 @@ export function BookmarksTab({ userId }: UserAwareProps) {
     try {
       await deleteBookmarkMutation({ id: bookmarkToDelete._id });
       toast.success(`Bookmark for "${bookmarkToDelete.note?.title || 'item'}" deleted.`);
-      // relies on query refresh
     } catch (error) {
       toast.error("Failed to delete bookmark.");
     } finally {
@@ -144,7 +143,6 @@ export function BookmarksTab({ userId }: UserAwareProps) {
     try {
         await updateBookmarkCommentMutation({ id: selectedBookmark._id, comment: editingComment.trim() });
         toast.success("Comment updated!");
-        // Optimistically update local state or rely on query refresh
         setBookmarks(prev => prev.map(b => b._id === selectedBookmark._id ? {...b, comment: editingComment.trim()} : b));
         setSelectedBookmark(prev => prev ? { ...prev, comment: editingComment.trim() } : null);
         setIsEditingComment(false);
@@ -156,23 +154,42 @@ export function BookmarksTab({ userId }: UserAwareProps) {
   const renderCategoryButtons = () => (
     <div className={`mb-6 flex flex-wrap items-center gap-2 ${useNotebookTheme ? 'bookmarks-controls-area !bg-transparent !border-none !p-0' : ''}`}>
         <span className={`text-sm font-medium mr-2 ${useNotebookTheme ? 'text-amber-700 font-["Architect_Daughter"]' : (darkMode ? 'text-neutral-400' : 'text-gray-600')}`}>Categories:</span>
-        {categories.map((category) => (
-            <Button
-            key={category}
-            variant="outline" // Base variant
-            size="sm"
-            onClick={() => setSelectedCategory(category)}
-            className={`bookmarks-category-button ${selectedCategory === category ? 'active' : ''}
-                        ${useNotebookTheme ? '' : (selectedCategory === category
-                            ? (darkMode ? 'bg-blue-500 text-white border-blue-500' : 'bg-blue-600 text-white border-blue-600')
-                            : (darkMode ? 'bg-neutral-700 border-neutral-600 text-neutral-300 hover:bg-neutral-600' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100 hover:border-gray-400'))
-                        }`}
-            >
-            {category}
-            </Button>
-        ))}
+        {categories.map((category) => {
+            const isActive = selectedCategory === category;
+            let themeSpecificClasses = "";
+            if (useNotebookTheme) {
+                themeSpecificClasses = `bookmarks-category-button ${isActive ? 'active' : ''}`;
+            } else { // Original Theme styling
+                if (isActive) {
+                    themeSpecificClasses = darkMode 
+                        ? 'bg-blue-600 text-white border-blue-500 hover:bg-blue-700' 
+                        : 'bg-blue-500 text-white border-blue-600 hover:bg-blue-600'; 
+                } else {
+                    // Ensure inactive buttons in original theme are visible with black text and white/light gray background
+                    themeSpecificClasses = darkMode 
+                        ? 'bg-neutral-700 border-neutral-500 text-neutral-200 hover:bg-neutral-600' 
+                        : 'bg-white border-gray-300 text-black hover:bg-gray-100 hover:border-gray-400';
+                }
+            }
+            return (
+                <Button
+                    key={category}
+                    // For original theme, we let Tailwind classes define the variant completely
+                    variant={useNotebookTheme ? "outline" : undefined} 
+                    size="sm"
+                    onClick={() => setSelectedCategory(category)}
+                    className={`
+                        px-3.5 py-1.5 text-xs shadow-sm transition-all duration-200 rounded-full
+                        ${themeSpecificClasses}
+                    `}
+                >
+                    {category}
+                </Button>
+            );
+        })}
     </div>
   );
+
 
   return (
     <div className={`bookmarkstab-container space-y-8 ${rootThemeClass}`}>
@@ -189,7 +206,7 @@ export function BookmarksTab({ userId }: UserAwareProps) {
             p-2.5 mr-3 rounded-xl shadow-md
             ${useNotebookTheme 
               ? 'bookmarkstab-title-icon-bg' 
-              : (darkMode ? 'bg-indigo-700' : 'bg-indigo-600')
+              : (darkMode ? 'bg-indigo-700' : 'bg-indigo-600') 
             }
           `}>
             <BookmarkIcon className={`h-6 w-6 text-white ${useNotebookTheme ? '' : ''}`} />
@@ -229,8 +246,8 @@ export function BookmarksTab({ userId }: UserAwareProps) {
                 />
               </div>
               <div className={`bookmarks-viewmode-toggle p-0.5 rounded-lg flex border ${useNotebookTheme ? '' : (darkMode ? 'bg-neutral-700 border-neutral-600' : 'bg-gray-200 border-gray-300')}`}>
-                    <Button variant={viewMode === 'grid' ? 'default' : 'ghost'} size="icon" onClick={() => setViewMode('grid')} className={`rounded-md h-8 w-8 ${viewMode === 'grid' ? 'active' : '' }`} title="Grid View"><LayoutGrid className="h-4 w-4"/></Button>
-                    <Button variant={viewMode === 'list' ? 'default' : 'ghost'} size="icon" onClick={() => setViewMode('list')} className={`rounded-md h-8 w-8 ${viewMode === 'list' ? 'active' : '' }`} title="List View"><ListChecks className="h-4 w-4"/></Button>
+                    <Button variant={viewMode === 'grid' ? 'default' : 'ghost'} size="icon" onClick={() => setViewMode('grid')} className={`rounded-md h-8 w-8 ${viewMode === 'grid' ? (useNotebookTheme ? 'active' : (darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')) : '' }`} title="Grid View"><LayoutGrid className="h-4 w-4"/></Button>
+                    <Button variant={viewMode === 'list' ? 'default' : 'ghost'} size="icon" onClick={() => setViewMode('list')} className={`rounded-md h-8 w-8 ${viewMode === 'list' ? (useNotebookTheme ? 'active' : (darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')) : '' }`} title="List View"><ListChecks className="h-4 w-4"/></Button>
                 </div>
           </div>
           {renderCategoryButtons()}
@@ -244,10 +261,29 @@ export function BookmarksTab({ userId }: UserAwareProps) {
                     <div className={`h-3 w-1/2 rounded mb-4 ${useNotebookTheme ? 'bg-amber-100' : (darkMode ? 'bg-neutral-700' : 'bg-gray-300')}`}></div>
                 </div> ))} </div>
       ) : filteredBookmarks.length === 0 ? (
-        <div className={`bookmarks-empty-state`}>
-          <ArchiveRestore className="h-16 w-16 mx-auto" />
-          <h3>{searchQuery || selectedCategory !== "All" ? "No Bookmarks Match Your Criteria" : "Your Bookmark Collection is Empty"}</h3>
-          <p className="mt-2 text-sm">
+        <div className={`
+            bookmarks-empty-state 
+            ${useNotebookTheme 
+                ? '' 
+                : `py-16 rounded-xl text-center ${darkMode ? 'bg-neutral-800 border border-neutral-700' : 'bg-white border border-gray-200 shadow-sm'}`
+            }
+        `}>
+          <ArchiveRestore className={`h-16 w-16 mx-auto mb-4 ${useNotebookTheme ? '' : (darkMode ? 'text-neutral-500' : 'text-gray-400')}`} />
+          <h3 className={`
+            ${useNotebookTheme 
+                ? '' 
+                : `text-xl font-bold ${darkMode ? 'text-neutral-100' : 'text-gray-800'}`
+            }
+          `}>
+            {searchQuery || selectedCategory !== "All" ? "No Bookmarks Match Your Criteria" : "Your Bookmark Collection is Empty"}
+          </h3>
+          <p className={`
+            mt-2 
+            ${useNotebookTheme 
+                ? '' 
+                : `text-base ${darkMode ? 'text-neutral-400' : 'text-gray-500'}`
+            }
+          `}>
             {searchQuery || selectedCategory !== "All" ? "Try adjusting your search or filter." : "Start bookmarking important notes!"}
           </p>
         </div>
@@ -316,7 +352,7 @@ export function BookmarksTab({ userId }: UserAwareProps) {
               <div className={`p-5 sm:p-6 max-h-[60vh] overflow-y-auto custom-scrollbar`}>
                 <div className={`comment-section-notebook mb-4`}>
                     <label className={`block text-sm font-medium mb-1 ${useNotebookTheme ? 'font-["Architect_Daughter"] text-amber-800' : (darkMode? 'text-neutral-300' : 'text-gray-700')}`}>Your Comment:</label>
-                    {isEditingComment ? (
+                    {isEditingComment ? ( 
                         <div className="space-y-2">
                             <Textarea value={editingComment} onChange={(e) => setEditingComment(e.target.value)} placeholder="Add or edit your comment..." className={`min-h-[80px] rounded-lg studyplan-modal-textarea ${useNotebookTheme ? '' : (darkMode ? 'bg-neutral-700 border-neutral-600' : 'border-gray-300')}`}/>
                             <div className="flex justify-end gap-2">
@@ -324,19 +360,19 @@ export function BookmarksTab({ userId }: UserAwareProps) {
                                 <Button size="sm" onClick={handleUpdateComment} className={`dialog-button-notebook primary ${useNotebookTheme ? '' : ''}`}>Save Comment</Button>
                             </div>
                         </div>
-                    ) : (
-                        <div onClick={() => setIsEditingComment(true)} className={`comment-display p-3 rounded-lg cursor-text min-h-[40px] ${selectedBookmark.comment ? '' : 'text-gray-400 italic'}`}>
+                    ) : ( 
+                        <div onClick={() => setIsEditingComment(true)} className={`comment-display p-3 rounded-lg cursor-text min-h-[40px] ${useNotebookTheme ? 'bg-amber-50 border border-amber-200' : (darkMode ? 'bg-neutral-700 border-neutral-600' : 'bg-gray-50 border-gray-200')} ${selectedBookmark.comment ? '' : (useNotebookTheme ? 'text-amber-700 opacity-70' : 'text-gray-400 italic')}`}>
                             {selectedBookmark.comment || "Click to add a comment..."}
                             {!selectedBookmark.comment && <Edit3 className="h-3 w-3 inline ml-2 opacity-50"/>}
                         </div>
-                    )}
+                     )}
                 </div>
                 <div className={`note-content-display ${useNotebookTheme ? '' : (darkMode ? 'prose prose-invert' : 'prose')} max-w-none`}>
                     <h3 className={`text-lg font-semibold mb-2 mt-0 ${useNotebookTheme ? 'font-["Architect_Daughter"] text-amber-900' : ''}`}>Original Note:</h3>
-                    {(selectedBookmark?.note?.content || "No content available.").split('\n').map((p, i) => <p key={i}>{p}</p>)}
+                    {(selectedBookmark?.note?.content || "No content available.").split('\n').map((p, i) => <p key={i} className="mb-3 last:mb-0">{p}</p>)}
                 </div>
               </div>
-              {selectedBookmark?.note?.tags && selectedBookmark.note.tags.length > 0 && (
+              {selectedBookmark?.note?.tags && selectedBookmark.note.tags.length > 0 && ( 
                 <div className={`px-5 sm:px-6 py-3 border-t flex flex-wrap gap-2 ${useNotebookTheme ? 'border-amber-200 bg-amber-50/30':'border-gray-100 bg-gray-50/50'}`}>
                   {selectedBookmark.note.tags.map(tag => <Badge key={tag} variant="secondary" className={`bookmark-tag-badge ${useNotebookTheme ? '' : (darkMode ? 'bg-neutral-700 text-neutral-300':'bg-gray-100 text-gray-600')}`}>{tag}</Badge>)}
                 </div> )}
@@ -347,7 +383,25 @@ export function BookmarksTab({ userId }: UserAwareProps) {
             </DialogContent>
           </Dialog>
         )}
-        {/* Delete Confirm Modal */}
+        {showDeleteConfirmModal && bookmarkToDelete && (
+          <Dialog open={showDeleteConfirmModal} onOpenChange={setShowDeleteConfirmModal}>
+            <DialogContent className={`sm:max-w-md dialog-content-notebook ${useNotebookTheme ? '' : (darkMode ? 'bg-neutral-800 text-neutral-100' : 'bg-white')}`}>
+                <div className="p-6 text-center">
+                    <div className={`mx-auto w-14 h-14 flex items-center justify-center rounded-full mb-4 ${useNotebookTheme ? 'bg-red-100' : (darkMode ? 'bg-red-500/10':'bg-red-100')}`}>
+                        <AlertTriangle className={`h-7 w-7 ${useNotebookTheme ? 'text-red-500' : (darkMode ? 'text-red-400':'text-red-500')}`} />
+                    </div>
+                    <DialogTitle className={`dialog-title-notebook text-lg font-semibold mb-2`}>Confirm Deletion</DialogTitle>
+                    <DialogDescription className={`mb-5 text-sm ${useNotebookTheme ? 'text-amber-800' : (darkMode ? 'text-neutral-400':'text-gray-500')}`}>
+                        Are you sure you want to delete the bookmark for "<strong>{bookmarkToDelete?.note?.title || 'this item'}</strong>"? This action cannot be undone.
+                    </DialogDescription>
+                     <div className="flex justify-center gap-3">
+                        <Button variant="outline" onClick={() => {setShowDeleteConfirmModal(false); setBookmarkToDelete(null);}} className={`dialog-button-notebook outline w-full`}>Cancel</Button>
+                        <Button variant="destructive" onClick={confirmDeleteBookmark} className={`dialog-button-notebook w-full ${useNotebookTheme ? '!bg-red-500 hover:!bg-red-600 text-white' : ''}`}>Delete Bookmark</Button>
+                    </div>
+                </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </AnimatePresence>
     </div>
   );
